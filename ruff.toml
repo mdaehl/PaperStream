@@ -1,0 +1,11 @@
+exclude = ["output_files", "f.py"]
+
+[format]
+docstring-code-format = true
+
+[lint]
+select = ["D"]
+ignore = ["D100"]
+
+[lint.pydocstyle]
+convention = "google"
