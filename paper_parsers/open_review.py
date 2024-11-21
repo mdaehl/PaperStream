@@ -9,7 +9,9 @@ from .base import APIProceedingParser
 
 class OpenReviewParser(APIProceedingParser):
     """Parser for proceeding OpenReview proceedings. The documentation is not always straightforward and there are two
-    versions of APIs depending on the venue."""
+    versions of APIs depending on the venue.
+    """
+
     def __init__(self, *args, **kwargs):
         self.base_url = "https://openreview.net"
         self.client_v1 = openreview.Client(
@@ -24,15 +26,16 @@ class OpenReviewParser(APIProceedingParser):
     @property
     @abstractmethod
     def venue_id(self) -> str:
-        """Returns: ID of desired venue. Can be find in url (.../group?id=VENUE_ID)"""
+        """Returns: ID of desired venue. Can be find in url (.../group?id=VENUE_ID)."""
         raise NotImplementedError
 
 
 class ICLRParser(OpenReviewParser):
     """Parser for the International Conference on Learning Representations (ICLR)."""
+
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "ICLR"
 
     def _validate_year(self) -> None:
@@ -110,7 +113,8 @@ class ICLRParser(OpenReviewParser):
 
         """
         proceeding_submissions_replies = [
-            submission.details["directReplies"] for submission in request_contents
+            submission.details["directReplies"]
+            for submission in request_contents
         ]
 
         filtered_submissions = []
@@ -143,7 +147,8 @@ class ICLRParser(OpenReviewParser):
 
         """
         proceeding_submissions_replies = [
-            submission.details["directReplies"] for submission in request_contents
+            submission.details["directReplies"]
+            for submission in request_contents
         ]
 
         filtered_submissions = []
@@ -160,7 +165,9 @@ class ICLRParser(OpenReviewParser):
 
         return filtered_submissions
 
-    def _parse_paper_content(self, paper_content: Note, paper_url: str | None = None) -> Paper:
+    def _parse_paper_content(
+        self, paper_content: Note, paper_url: str | None = None
+    ) -> Paper:
         """Parse paper content from API specific Note format (similar to dictionary).
 
         Args:

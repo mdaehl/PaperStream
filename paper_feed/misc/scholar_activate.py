@@ -1,8 +1,10 @@
 import argparse
-from misc import settings
-from tqdm import tqdm
 import re
+
 import requests
+from tqdm import tqdm
+
+from misc import settings
 
 
 def load_xml_feed_file(file_path: str) -> str:

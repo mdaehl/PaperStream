@@ -14,6 +14,7 @@ from .base import KeyedContentHandler
 
 class SpringerBaseContentHandler(KeyedContentHandler):
     """Base class to handle Springer content."""
+
     def __init__(self):
         self.api_url = "https://api.springernature.com/meta/v2/json"
         self.api_key = self._load_api_key("springer_api_key")
@@ -48,7 +49,9 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         else:
             return False
 
-    def _get_request_identifiers(self, paper_list: list[Paper]) -> list[list[str]]:
+    def _get_request_identifiers(
+        self, paper_list: list[Paper]
+    ) -> list[list[str]]:
         """Build request identifiers to be able to subsequently assign the individual papers of combined requests. If the API is used, the DOIs are stored as identification info. Otherwise, the super method is used, as no identification for single paper requests is needed.
 
         Args:
@@ -117,6 +120,9 @@ class SpringerBaseContentHandler(KeyedContentHandler):
 
         """
         dois_list = self._get_paper_dois(paper_list)
+        dois_list = [
+            [f"doi:{doi}" for doi in doi_items] for doi_items in dois_list
+        ]
 
         request_urls = []
         for dois in dois_list:
@@ -126,14 +132,18 @@ class SpringerBaseContentHandler(KeyedContentHandler):
                 "p": self.api_max_records,
             }
             request_urls.append(
-                requests.Request("GET", self.api_url, params=params).prepare().url
+                requests.Request("GET", self.api_url, params=params)
+                .prepare()
+                .url
             )
 
         return request_urls
 
     @staticmethod
     @abstractmethod
-    def _get_paper_data_from_web_content_item(content_item: bs4.element.Tag) -> dict:
+    def _get_paper_data_from_web_content_item(
+        content_item: bs4.element.Tag,
+    ) -> dict:
         """Abstract method to retrieve single paper data from content item via bs4.
 
         Args:
@@ -142,7 +152,6 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         Returns:
             Paper data as dictionary
         """
-
         raise NotImplementedError
 
     @staticmethod
@@ -191,22 +200,43 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         if self.use_api:
             json_content = json.loads(content)
             article_contents = json_content["records"]
+
+            # If an article is missing for whatever reason we will it with a template. The information will then NOT be
+            # updated when reassigning the content.
+            missing_articles = set(content_ids) - set(
+                [i["doi"] for i in article_contents]
+            )
+            if len(missing_articles) > 0:
+                for missing_article in missing_articles:
+                    article_contents.append(
+                        {
+                            "title": None,
+                            "abstract": None,
+                            "creators": [{"creator": None}],
+                            "doi": missing_article,
+                        }
+                    )
+
             article_contents = sorted(
                 article_contents, key=lambda x: content_ids.index(x["doi"])
             )
+
             paper_data_list = [
                 self._get_paper_data_from_api_content_item(content_item)
                 for content_item in article_contents
             ]
         else:
             content = bs4.BeautifulSoup(content, features="xml")
-            paper_data_list = [self._get_paper_data_from_web_content_item(content)]
+            paper_data_list = [
+                self._get_paper_data_from_web_content_item(content)
+            ]
 
         return paper_data_list
 
 
 class SpringerContentHandler(SpringerBaseContentHandler):
     """ContentHandler to access Springer data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
+
     def _get_paper_dois(self, paper_list: list[Paper]) -> list[list[str]]:
         """Get the paper DOIs per request from the URLs.
 
@@ -221,16 +251,25 @@ class SpringerContentHandler(SpringerBaseContentHandler):
         for paper in paper_list:
             paper_url = paper.url
             sub_doi = paper_url.split("/")[-1]
+            sub_doi = sub_doi.split(
+                "#"
+            )[
+                0
+            ]  # sometimes paging information is in the url, which is not part of the DOI
             sub_doi = re.sub(
                 ".pdf", "", sub_doi
             )  # free articles have a ".pdf" at the end
             doi_preface = paper_url.split("/")[-2]
             paper_dois.append(f"{doi_preface}/{sub_doi}")
 
-        return list(map(lambda x: list(x), batched(paper_dois, self.api_max_records)))
+        return list(
+            map(lambda x: list(x), batched(paper_dois, self.api_max_records))
+        )
 
     @staticmethod
-    def _get_paper_data_from_web_content_item(content_item: bs4.BeautifulSoup) -> dict:
+    def _get_paper_data_from_web_content_item(
+        content_item: bs4.BeautifulSoup,
+    ) -> dict:
         """Retrieve single paper data from content item via bs4.
 
         Args:
@@ -249,7 +288,9 @@ class SpringerContentHandler(SpringerBaseContentHandler):
         authors = list(
             map(
                 lambda x: x["content"],
-                content_item.find_all("meta", attrs={"name": "citation_author"}),
+                content_item.find_all(
+                    "meta", attrs={"name": "citation_author"}
+                ),
             )
         )
         return {"title": title, "abstract": abstract, "authors": authors}
@@ -257,6 +298,7 @@ class SpringerContentHandler(SpringerBaseContentHandler):
 
 class NatureContentHandler(SpringerBaseContentHandler):
     """ContentHandler to access Nature data, which is based on Springer. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
+
     def _get_paper_dois(self, paper_list: list[Paper]) -> list[list[str]]:
         """Get the paper DOIs per request from the URLs.
 
@@ -271,16 +313,25 @@ class NatureContentHandler(SpringerBaseContentHandler):
         for paper in paper_list:
             paper_url = paper.url
             sub_doi = paper_url.split("/")[-1]
+            sub_doi = sub_doi.split(
+                "#"
+            )[
+                0
+            ]  # sometimes paging information is in the url, which is not part of the DOI
             sub_doi = re.sub(
                 ".pdf", "", sub_doi
             )  # free articles have a ".pdf" at the end
             doi_preface = "10.1038"  # fixed DOI of nature
             paper_dois.append(f"{doi_preface}/{sub_doi}")
 
-        return list(map(lambda x: list(x), batched(paper_dois, self.api_max_records)))
+        return list(
+            map(lambda x: list(x), batched(paper_dois, self.api_max_records))
+        )
 
     @staticmethod
-    def _get_paper_data_from_web_content_item(content_item: bs4.BeautifulSoup) -> dict:
+    def _get_paper_data_from_web_content_item(
+        content_item: bs4.BeautifulSoup,
+    ) -> dict:
         """Retrieve single paper data from content item via bs4.
 
         Args:
@@ -290,8 +341,12 @@ class NatureContentHandler(SpringerBaseContentHandler):
             Paper data as dictionary
 
         """
-        title = content_item.find("meta", attrs={"name": "dc.title"})["content"]
-        abstract = content_item.find("meta", attrs={"name": "description"})["content"]
+        title = content_item.find("meta", attrs={"name": "dc.title"})[
+            "content"
+        ]
+        abstract = content_item.find("meta", attrs={"name": "description"})[
+            "content"
+        ]
         authors = list(
             map(
                 lambda x: x["content"],

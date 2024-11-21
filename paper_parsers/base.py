@@ -2,8 +2,8 @@ import asyncio
 import os
 import warnings
 from abc import abstractmethod, ABC
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 import bs4
 
@@ -17,7 +17,7 @@ class ProceedingParser(ABC):
 
     def __init__(self, year: int):
         """Args:
-            year: Year of the proceeding to parse.
+        year: Year of the proceeding to parse.
         """
         self.year = year
         self.papers = []
@@ -27,23 +27,23 @@ class ProceedingParser(ABC):
     @property
     @abstractmethod
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding
-        """
+        """Returns: Name of the proceeding."""
         raise NotImplementedError
 
     @abstractmethod
     def retrieve_papers(self) -> None:
-        """Abstract method for retrieving all papers of the proceeding.
-        """
+        """Abstract method for retrieving all papers of the proceeding."""
         raise NotImplementedError
 
     @abstractmethod
-    def _parse_paper_content(self, paper_content: Any, paper_url: str | None = None) -> Paper:
-        """Abstract method for parsing paper content into a paper item.
+    def _parse_paper_content(
+        self, paper_content: Any, paper_url: str | None = None
+    ) -> Paper:
+        """Abstract method for parsing paper content into a paper object.
 
         Args:
             paper_content: Paper content to parse.
-            paper_url: Url of the paper content to support parsing.
+            paper_url: Url of the paper content to support parsing. Mostly required for debugging.
 
         Returns:
             Parsed content as a Paper item.
@@ -52,8 +52,7 @@ class ProceedingParser(ABC):
         raise NotImplementedError
 
     def _validate_year(self) -> None:
-        """Check if the proceeding year is valid. The year cannot be in the future.
-        """
+        """Check if the proceeding year is valid. The year cannot be in the future."""
         if self.year > datetime.now().year:
             raise ValueError("The year cannot be in the future.")
 
@@ -82,8 +81,7 @@ class ProceedingParser(ABC):
 
     @property
     def default_output_file(self):
-        """Returns: Default file name of the output file, when being exported.
-        """
+        """Returns: Default file name of the output file, when being exported."""
         return f"{settings.output_file_dir}/{self.proceeding_name}_{self.year}"
 
     def export_papers(
@@ -145,12 +143,11 @@ class ProceedingParser(ABC):
 
 
 class APIProceedingParser(ProceedingParser):
-    """Class of proceeding parser that is based on API requests.
-    """
+    """Class of proceeding parser that is based on API requests."""
 
     @abstractmethod
-    def request_contents(self) -> list[Any]:
-        """Request all paper contents.
+    def _request_contents(self) -> list[Any]:
+        """Abstract method to request all paper contents.
 
         Returns:
             List of contents.
@@ -159,19 +156,19 @@ class APIProceedingParser(ProceedingParser):
         raise NotImplementedError
 
     @staticmethod
-    def process_contents(request_contents: list[dict]) -> list[dict]:
+    def _process_contents(request_contents: list[dict]) -> list[dict]:
         """Process the raw request contents, if required. This base method does not perform any processing.
 
         Args:
             request_contents: List of raw paper contents from requests.
 
         Returns:
-            Processed contents.
+            List of processed contents.
 
         """
         return request_contents
 
-    def filter_contents(self, request_contents: list[dict]) -> list[dict]:
+    def _filter_contents(self, request_contents: list[dict]) -> list[dict]:
         """Base function for filtering contents. In this case simply the original contents are returned.
 
         Args:
@@ -189,11 +186,11 @@ class APIProceedingParser(ProceedingParser):
 
         """
         print("Getting paper contents.")
-        contents = self.request_contents()
+        contents = self._request_contents()
         print("Processing paper contents.")
-        contents = self.process_contents(contents)
+        contents = self._process_contents(contents)
         print("Filtering paper contents.")
-        contents = self.filter_contents(contents)
+        contents = self._filter_contents(contents)
         print("Parsing paper contents.")
         self.papers = [
             self._parse_paper_content(paper_content)
@@ -202,21 +199,20 @@ class APIProceedingParser(ProceedingParser):
 
 
 class WebProceedingParser(ProceedingParser):
-    """Class of proceeding parser that is based on web scraping.
-    """
+    """Class of proceeding parser that is based on web scraping."""
 
     def __init__(self, year: int):
         """Args:
-            year: Year of the proceeding to parse.
+        year: Year of the proceeding to parse.
         """
         super().__init__(year)
         self.requester = None
 
-    def get_paper_urls(self) -> list[str]:
-        """
-        Retrieve the paper urls by first getting the url container and extracting the content.
+    def _get_paper_urls(self) -> list[str]:
+        """Retrieve the paper urls by first getting the url container and extracting the content.
 
-        Returns: List containing the paper urls.
+        Returns:
+            List containing the paper urls.
 
         """
         url_containers = self._get_url_containers()
@@ -225,10 +221,10 @@ class WebProceedingParser(ProceedingParser):
 
     @abstractmethod
     def _get_url_containers(self) -> list[bs4.element.Tag]:
-        """Get containers (Tags) from the webpage which contain the paper urls.
+        """Abstract method to get containers (Tags) from the webpage which contain the paper urls.
 
         Returns:
-            Url container item which contains the paper urls itself.
+            List of url containers which contain the paper urls itself.
 
         """
         raise NotImplementedError
@@ -238,7 +234,7 @@ class WebProceedingParser(ProceedingParser):
         via requests asynchronously. Finally, parse the contents to get the paper items.
         """
         print("Getting paper urls.")
-        paper_urls = self.get_paper_urls()
+        paper_urls = self._get_paper_urls()
 
         if len(paper_urls):
             print("Getting paper contents.")

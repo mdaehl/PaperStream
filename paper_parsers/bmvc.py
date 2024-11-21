@@ -8,6 +8,8 @@ from .base import WebProceedingParser
 
 
 class BMVCParser(WebProceedingParser):
+    """Parser for the Conference on British Machine Vision Conference (BMVC)."""
+
     def __init__(self, *args, **kwargs):
         self.year_mapping = {
             2022: "https://bmvc2022.mpi-inf.mpg.de",
@@ -17,7 +19,7 @@ class BMVCParser(WebProceedingParser):
 
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "BMVC"
 
     @property
@@ -26,8 +28,7 @@ class BMVCParser(WebProceedingParser):
         return self.year_mapping[self.year]
 
     def _validate_year(self) -> None:
-        """Check default year conditions from super and ensure that year is part of the year_mapping.
-        """
+        """Check default year conditions from super and ensure that year is part of the year_mapping."""
         super()._validate_year()
         if self.year not in self.year_mapping.keys():
             raise ValueError(
@@ -45,7 +46,9 @@ class BMVCParser(WebProceedingParser):
         url_containers = list(main_soup.find_all("tr", id="paper"))
         return url_containers
 
-    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
+    def _parse_paper_content(
+        self, paper_content: str, paper_url: str = None
+    ) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:

@@ -11,23 +11,28 @@ from misc import settings
 
 class Feed:
     """Feed class which does handle all paper processing of a single Feed."""
-    def __init__(
-        self, source_file: str, target_file: str, online: bool, appending: bool = True
-    ):
-        """
 
-        Args:
-            source_file: Source feed file
-            target_file: Target feed file where the info should be saved.
-            online: Whether the feed file is online or not.
-            appending: Whether to append the content to an existing file or overwrite it.
+    def __init__(
+        self,
+        source_file: str,
+        target_file: str,
+        online: bool,
+        appending: bool = True,
+    ):
+        """Args:
+        source_file: Source feed file
+        target_file: Target feed file where the info should be saved.
+        online: Whether the feed file is online or not.
+        appending: Whether to append the content to an existing file or overwrite it.
         """
         self.source_file = source_file
         self.target_file = target_file
         self.online = online
         self.appending = appending
 
-        self.feed_content = self._load_feed_content()  # content as BeautifulSoup
+        self.feed_content = (
+            self._load_feed_content()
+        )  # content as BeautifulSoup
 
         if self.appending:
             self.existing_papers = self._get_existing_papers()
@@ -67,7 +72,9 @@ class Feed:
         if self.online:
             try:
                 content = requests.get(
-                    self.source_file, proxies=settings.proxies, verify=settings.verify_ssl
+                    self.source_file,
+                    proxies=settings.proxies,
+                    verify=settings.verify_ssl,
                 ).content.decode("utf-8")
             except requests.exceptions.InvalidSchema:
                 raise ValueError(f"{self.source_file} is no valid URL.")
@@ -99,9 +106,14 @@ class Feed:
                 )
             )
             abstracts = list(
-                map(lambda x: x.text, file_soup_content.select("entry >summary"))
+                map(
+                    lambda x: x.text,
+                    file_soup_content.select("entry >summary"),
+                )
             )
-            links = list(map(lambda x: x.text, file_soup_content.select("entry >id")))
+            links = list(
+                map(lambda x: x.text, file_soup_content.select("entry >id"))
+            )
 
             for title, authors, abstract, url in zip(
                 titles, all_authors, abstracts, links

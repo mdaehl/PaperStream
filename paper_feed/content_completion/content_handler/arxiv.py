@@ -10,6 +10,7 @@ from .base import ContentHandler
 
 class ArxivContentHandler(ContentHandler):
     """ContentHandler to access Arxiv data."""
+
     def __init__(self):
         self.base_url = "https://export.arxiv.org/api/query?id_list"
         self.max_request_size = (
@@ -39,11 +40,10 @@ class ArxivContentHandler(ContentHandler):
             )
         return request_urls
 
-    def get_request_identifiers(
+    def _get_request_identifiers(
         self, paper_list: list[Paper]
     ) -> list[list[str | None]]:
-        """
-         Build request identifiers to be able to subsequently assign the individual papers of combined requests. The Arxiv API preserves the order of combined request, hence, no identifier needed but the shape is still w.r.t. the request size.
+        """Build request identifiers to be able to subsequently assign the individual papers of combined requests. The Arxiv API preserves the order of combined request, hence, no identifier needed but the shape is still w.r.t. the request size.
 
         Args:
             paper_list: List of papers
@@ -53,12 +53,12 @@ class ArxivContentHandler(ContentHandler):
 
         """
         return [
-            [None] for _ in range(math.ceil(len(paper_list) / self.max_request_size))
+            [None]
+            for _ in range(math.ceil(len(paper_list) / self.max_request_size))
         ]
 
     def _get_request_headers(self, paper_list: list[Paper]) -> list[None]:
-        """
-        Build request headers to retrieve the publisher related paper information. No header is required but the shape depends on the request size.
+        """Build request headers to retrieve the publisher related paper information. No header is required but the shape depends on the request size.
 
         Args:
             paper_list: List of papers
@@ -91,7 +91,9 @@ class ArxivContentHandler(ContentHandler):
         return paper_data_list
 
     @staticmethod
-    def get_paper_data_from_content_item(content_item: bs4.element.Tag) -> dict:
+    def get_paper_data_from_content_item(
+        content_item: bs4.element.Tag,
+    ) -> dict:
         """Retrieve single paper data from content item via bs4.
 
         Args:

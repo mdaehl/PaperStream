@@ -4,13 +4,14 @@ from itertools import chain
 import yaml
 from tqdm import tqdm
 
-from content_completion import ContentCompletor
-from feed import Feed
+from .content_completion import ContentCompletor
+from .feed import Feed
 from misc import settings
 
 
 class FeedList:
     """Feed list class which manages all processing across the individual feeds."""
+
     def __init__(
         self,
         use_config_file: bool,
@@ -21,18 +22,19 @@ class FeedList:
         remove_duplicates_within_feed: bool = True,
         remove_duplicates_across_feeds: bool = False,
     ):
-        """
-        Args:
-            use_config_file: Whether to use the YAML config file for the feeds.
-            source_file: Optional source feed file, if no config file is used.
-            target_file: Optional target feed file where the info should be saved, if no config file is used.
-            online: Whether the feed file is online or not, if no config file is used.
-            appending: Whether to append the content to an existing file or overwrite it, if no config file is used.
-            remove_duplicates_within_feed: Whether to remove duplicate entries within a feed w.r.t. new entries.
-            remove_duplicates_across_feeds: Whether to remove duplicate entries across feeds w.r.t. new entries.
+        """Args:
+        use_config_file: Whether to use the YAML config file for the feeds.
+        source_file: Optional source feed file, if no config file is used.
+        target_file: Optional target feed file where the info should be saved, if no config file is used.
+        online: Whether the feed file is online or not, if no config file is used.
+        appending: Whether to append the content to an existing file or overwrite it, if no config file is used.
+        remove_duplicates_within_feed: Whether to remove duplicate entries within a feed w.r.t. new entries.
+        remove_duplicates_across_feeds: Whether to remove duplicate entries across feeds w.r.t. new entries.
         """
         # ensure there is just on feed input and the args match that
-        if use_config_file and (source_file or target_file or online or appending):
+        if use_config_file and (
+            source_file or target_file or online or appending
+        ):
             raise ValueError(
                 "You cannot use the config file and provide additional attributes."
             )
@@ -56,7 +58,10 @@ class FeedList:
         # duplicate handling
         self.remove_duplicates_within_feed = remove_duplicates_within_feed
         self.remove_duplicates_across_feeds = remove_duplicates_across_feeds
-        if self.remove_duplicates_within_feed and remove_duplicates_across_feeds:
+        if (
+            self.remove_duplicates_within_feed
+            and remove_duplicates_across_feeds
+        ):
             warnings.warn(
                 "Duplicate removal within and across feeds was activated, therefore remove across feeds is selected."
             )
@@ -87,7 +92,9 @@ class FeedList:
 
         """
         try:
-            return yaml.safe_load(open(settings.feed_config_file)).get("pairings")
+            return yaml.safe_load(open(settings.feed_config_file)).get(
+                "pairings"
+            )
         except FileNotFoundError:
             raise FileNotFoundError(
                 f"The file {settings.feed_config_file} was not found. Please check again or adapt the path in the config file."
@@ -103,14 +110,14 @@ class FeedList:
         Args:
             feed_settings: List of feed settings to validate.
 
-        Returns:
-
         """
         for feed_setting in feed_settings:
             for key, expected_type in self.required_feed_attributes.items():
                 # check if all attributes are present
                 if key not in feed_setting:
-                    raise KeyError(f"Missing required key: '{key}' in feed_settings.")
+                    raise KeyError(
+                        f"Missing required key: '{key}' in feed_settings."
+                    )
 
                 # check if all elements in the attributes list are of the expected type
                 if not isinstance(feed_setting[key], expected_type):
@@ -142,16 +149,13 @@ class FeedList:
         return feeds
 
     def get_feed_data(self) -> None:
-        """Retrieve the paper data of all feeds w.r.t. duplicates and assign the new contents to the papers of all feeds. The update stats are printed subsequently for information purposes.
-        """
+        """Retrieve the paper data of all feeds w.r.t. duplicates and assign the new contents to the papers of all feeds. The update stats are printed subsequently for information purposes."""
         self._remove_duplicates()
         self._complete_paper_data()
         self._print_stats()
 
     def _remove_duplicates(self):
-        """Remove the duplicate entries within/across the feeds if desired.
-
-        """
+        """Remove the duplicate entries within/across the feeds if desired."""
         id_lists = [feed.paper_ids for feed in self.feeds]
 
         if self.remove_duplicates_across_feeds:
@@ -169,9 +173,10 @@ class FeedList:
                 feed.remove_papers_from_incomplete_feed(unique_ids)
 
     def _complete_paper_data(self) -> None:
-        """Get the HTML contents of all papers from all feeds that are in the feed list. The content completor optimizes that data retrieval to minimize the requests. Finally assign the contents to the feeds and their respective papers.
-        """
-        incomplete_paper_list = [feed.incomplete_feed_papers for feed in self.feeds]
+        """Get the HTML contents of all papers from all feeds that are in the feed list. The content completor optimizes that data retrieval to minimize the requests. Finally assign the contents to the feeds and their respective papers."""
+        incomplete_paper_list = [
+            feed.incomplete_feed_papers for feed in self.feeds
+        ]
         content_retriever = ContentCompletor(incomplete_paper_list)
         contents = content_retriever.get_contents()
         content_retriever.assign_contents(contents=contents)
@@ -185,6 +190,8 @@ class FeedList:
     def save_feeds(self) -> None:
         """Save the papers of each feed in the feed list."""
         for feed in tqdm(
-            self.feeds, total=len(self.feeds), desc="Generating and saving atom feeds."
+            self.feeds,
+            total=len(self.feeds),
+            desc="Generating and saving atom feeds.",
         ):
             feed.save_feed()

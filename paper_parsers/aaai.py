@@ -9,6 +9,8 @@ from .base import WebProceedingParser
 
 
 class AAAIParser(WebProceedingParser):
+    """Parser for the AAAI conference."""
+
     def __init__(self, *args, **kwargs):
         self.base_url = "https://ojs.aaai.org/index.php/AAAI"
         self.year_mapping = {
@@ -22,11 +24,11 @@ class AAAIParser(WebProceedingParser):
 
     @property
     def proceeding_name(self) -> str:
+        """Returns: Name of the proceeding."""
         return "AAAI"
 
     def _validate_year(self) -> None:
-        """Check default year conditions from super and ensure that year is part of the year_mapping.
-        """
+        """Check default year conditions from super and ensure that year is part of the year_mapping."""
         super()._validate_year()
         if self.year not in self.year_mapping.keys():
             raise ValueError(
@@ -45,7 +47,8 @@ class AAAIParser(WebProceedingParser):
         start_idx = self.year_mapping[self.year]["start"]
         end_idx = self.year_mapping[self.year]["end"]
         conference_pages = [
-            f"{self.base_url}/issue/view/{i}" for i in range(start_idx, end_idx)
+            f"{self.base_url}/issue/view/{i}"
+            for i in range(start_idx, end_idx)
         ]
 
         # get all page contents via asyncio
@@ -55,16 +58,21 @@ class AAAIParser(WebProceedingParser):
             utils.get_urls_content(conference_pages, headers_list=headers_list)
         )
         # process each page content
-        soup_contents = map(lambda x: bs4.BeautifulSoup(x, "lxml"), page_contents)
+        soup_contents = map(
+            lambda x: bs4.BeautifulSoup(x, "lxml"), page_contents
+        )
         url_containers = map(
-            lambda x: x.find_all("div", class_="obj_article_summary"), soup_contents
+            lambda x: x.find_all("div", class_="obj_article_summary"),
+            soup_contents,
         )
         # combine url containers of each page into a single list
         url_containers = list(itertools.chain.from_iterable(url_containers))
 
         return url_containers
 
-    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
+    def _parse_paper_content(
+        self, paper_content: str, paper_url: str = None
+    ) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:

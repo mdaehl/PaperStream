@@ -9,6 +9,7 @@ from .base import WebProceedingParser
 
 class PLMRParser(WebProceedingParser):
     """Parser for conferences of the Proceedings of Machine Learning Research (PLMR)."""
+
     def __init__(self, *args, **kwargs):
         self.base_url = "https://proceedings.mlr.press"
         super().__init__(*args, **kwargs)
@@ -47,7 +48,9 @@ class PLMRParser(WebProceedingParser):
         url_containers = list(main_soup.select("p.links"))
         return url_containers
 
-    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
+    def _parse_paper_content(
+        self, paper_content: str, paper_url: str = None
+    ) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:
@@ -74,6 +77,8 @@ class PLMRParser(WebProceedingParser):
 
 
 class AISTATSParser(PLMRParser):
+    """Parser for the International Conference on Artificial Intelligence and Statistics (AISTATS)."""
+
     @property
     def year_mapping(self) -> dict:
         """Returns: Mapping of years to versions (IDs)."""
@@ -87,11 +92,13 @@ class AISTATSParser(PLMRParser):
 
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "AISTATS"
 
 
 class CORLParser(PLMRParser):
+    """Parser for the Conference on Robot Learning (CORL)."""
+
     @property
     def year_mapping(self) -> dict:
         """Returns: Mapping of years to versions (IDs)."""
@@ -104,11 +111,13 @@ class CORLParser(PLMRParser):
 
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "CORL"
 
 
 class ICMLParser(PLMRParser):
+    """Parser for the International Conference on Machine Learning (ICML)."""
+
     @property
     def year_mapping(self) -> dict:
         """Returns: Mapping of years to versions (IDs)."""
@@ -122,5 +131,5 @@ class ICMLParser(PLMRParser):
 
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "ICML"

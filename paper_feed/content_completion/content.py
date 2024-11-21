@@ -5,7 +5,7 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import List
 
-from misc import utils
+from misc import utils, settings
 from misc.utils import Paper
 from .content_handler import (
     ArxivContentHandler,
@@ -18,9 +18,9 @@ from .content_handler import (
 
 class ContentCompletor:
     """Content completor to get missing data of incomplete papers from Google Scholar notifications."""
+
     def __init__(self, paper_lists: List[List[Paper]]):
-        """
-        Initialize a ContentCompletor object.
+        """Initialize a ContentCompletor object.
 
         Args:
             paper_lists: List of papers
@@ -57,14 +57,16 @@ class ContentCompletor:
         return contents
 
     def _group_papers_by_domain(self) -> None:
-        """
-        Group papers of all feeds according to their publishers to allow combined (optimized) requests later.
-        """
+        """Group papers of all feeds according to their publishers to allow combined (optimized) requests later."""
         flattened_idx = 0
         for idx_feed, paper_list in enumerate(self.paper_lists):
             for idx_paper, paper in enumerate(paper_list):
-                self.papers_grouped_by_source[paper.source_domain].append(paper)
-                self.input_order_indices[paper.source_domain].append(flattened_idx)
+                self.papers_grouped_by_source[paper.source_domain].append(
+                    paper
+                )
+                self.input_order_indices[paper.source_domain].append(
+                    flattened_idx
+                )
                 self.mapping_flattened_list_to_two_d[flattened_idx] = (
                     idx_feed,
                     idx_paper,
@@ -72,20 +74,16 @@ class ContentCompletor:
                 flattened_idx += 1
 
     def _build_request_urls(self) -> None:
-        """
-        Build the request urls (and headers) based on the publisher.
-        """
+        """Build the request urls (and headers) based on the publisher."""
         for domain, papers in self.papers_grouped_by_source.items():
             content_handler = self.content_handlers.get(domain)
 
             if content_handler:
                 request_info = content_handler.get_request_info(papers)
-
                 self.request_infos[domain] = request_info
 
     def _request_contents(self) -> list[str]:
-        """
-        Request all html contents with aiohttp based on the request urls and headers.
+        """Request all html contents with aiohttp based on the request urls and headers.
 
         Returns:
             Requested paper contents.
@@ -99,12 +97,18 @@ class ContentCompletor:
         )
         request_headers = list(
             itertools.chain.from_iterable(
-                map(lambda x: x["request_headers"], self.request_infos.values())
+                map(
+                    lambda x: x["request_headers"], self.request_infos.values()
+                )
             )
         )
 
         contents = loop.run_until_complete(
-            utils.get_urls_content(request_urls, request_headers)
+            utils.get_urls_content(
+                request_urls,
+                request_headers,
+                request_limit=settings.feed_completion_request_limit,
+            )
         )
         return contents
 
@@ -143,17 +147,26 @@ class ContentCompletor:
             content_ids_list = self.request_infos[domain]["identifiers"]
             paper_data_list = []
             for content, content_ids in zip(content_list, content_ids_list):
-                paper_data_list += content_handler.get_paper_contents_from_request_content(content, content_ids)
+                paper_data_list += (
+                    content_handler.get_paper_contents_from_request_content(
+                        content, content_ids
+                    )
+                )
 
             # update the paper list
-            flattened_indices = self.input_order_indices[
-                domain
-            ]
+            flattened_indices = self.input_order_indices[domain]
             list_two_d_indices = [
-                self.mapping_flattened_list_to_two_d[idx] for idx in flattened_indices
+                self.mapping_flattened_list_to_two_d[idx]
+                for idx in flattened_indices
             ]
 
-            for paper_data, two_d_idx in zip(paper_data_list, list_two_d_indices):
+            for paper_data, two_d_idx in zip(
+                paper_data_list, list_two_d_indices
+            ):
+                # skip paper data which could be not retrieved correctly
+                if paper_data["title"] is None:
+                    continue
+
                 feed_idx, paper_idx = two_d_idx
                 selected_paper = self.paper_lists[feed_idx][paper_idx]
 
@@ -163,18 +176,24 @@ class ContentCompletor:
 
     @staticmethod
     def _validate_assignment(selected_paper: Paper, paper_data: dict) -> None:
-        """
-        Validate the assignment of the new content to the existing paper.
+        """Validate the assignment of the new content to the existing paper.
 
         Args:
             selected_paper: Paper to which the data is assigned.
             paper_data: Data which is used for updating/assigned new information.
 
         """
-        new_title = deepcopy(paper_data["title"])  # avoid altering the original data
-        old_title = deepcopy(selected_paper.title)  # avoid altering the original data
+        new_title = deepcopy(
+            paper_data["title"]
+        )  # avoid altering the original data
+        old_title = deepcopy(
+            selected_paper.title
+        )  # avoid altering the original data
 
         # compare bare strings (without spacing, case-sensitivity or special characters)
         new_title = re.sub(r"[^a-zA-Z0-9]", "", new_title).lower()
         old_title = re.sub(r"[^a-zA-Z0-9]", "", old_title).lower()
-        assert new_title == old_title
+
+        # sometimes the actual title is longer/shorter compared to the requested one
+        # therefore check if either one is in the other one
+        assert old_title in new_title or new_title in old_title

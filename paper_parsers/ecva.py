@@ -8,13 +8,15 @@ from .base import WebProceedingParser
 
 
 class ECCVParser(WebProceedingParser):
+    """Parser for the all conferences of the European Computer Vision Association (ECVA)."""
+
     def __init__(self, *args, **kwargs):
         self.base_url = "https://www.ecva.net"
         super().__init__(*args, **kwargs)
 
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "ECCV"
 
     @property
@@ -32,7 +34,7 @@ class ECCVParser(WebProceedingParser):
         url_containers = list(main_soup.select("dt.ptitle"))
         return url_containers
 
-    def get_paper_urls(self) -> list[str]:
+    def _get_paper_urls(self) -> list[str]:
         """Use super method to get paper urls and add base url to all. Finally filter the urls to match the desired
         year.
 
@@ -40,9 +42,11 @@ class ECCVParser(WebProceedingParser):
             List containing the paper urls.
 
         """
-        paper_urls = super().get_paper_urls()
+        paper_urls = super()._get_paper_urls()
         # add base url to all links
-        paper_urls = [f"{self.base_url}/{paper_url}" for paper_url in paper_urls]
+        paper_urls = [
+            f"{self.base_url}/{paper_url}" for paper_url in paper_urls
+        ]
         paper_urls = self.filter_urls(paper_urls)
         return paper_urls
 
@@ -57,7 +61,9 @@ class ECCVParser(WebProceedingParser):
         """
         return [url for url in urls if f"ECCV_{self.year}" in url]
 
-    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper | None:
+    def _parse_paper_content(
+        self, paper_content: str, paper_url: str = None
+    ) -> Paper | None:
         """Parse paper content via bs4 into a paper object.
 
         Args:
@@ -86,5 +92,7 @@ class ECCVParser(WebProceedingParser):
             return Paper(title, authors, abstract, url)
 
         except IndexError:
-            warnings.warn(f"The paper with the link {paper_url} could not be found.")
+            warnings.warn(
+                f"The paper with the link {paper_url} could not be found."
+            )
             return

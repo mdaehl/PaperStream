@@ -5,14 +5,16 @@ import re
 from abc import abstractmethod
 from xml.sax.saxutils import escape
 
-from utils import Paper
+from misc.utils import Paper
 
 
 class FileExporter(abc.ABC):
     """Base class exporter to export list of papers into a file."""
 
     def __init__(self, output_file: str):
-        """Args:
+        """Initialize a FileExporter object.
+
+        Args:
         output_file: name/path of the output file without file extension.
         """
         self.output_file = output_file
@@ -120,7 +122,9 @@ class CSVFileExporter(FileExporter):
         # get rid of optional file extension
         self.output_file = re.sub(".csv", "", self.output_file)
 
-        with open(f"{self.output_file}.csv", "w", newline="", encoding="utf-8") as f:
+        with open(
+            f"{self.output_file}.csv", "w", newline="", encoding="utf-8"
+        ) as f:
             data = [
                 {k: v for k, v in vars(paper).items() if k in exported_fields}
                 for paper in paper_list

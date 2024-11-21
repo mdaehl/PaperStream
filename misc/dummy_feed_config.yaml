@@ -1,9 +1,9 @@
 pairings:
   - source_file: "https://kill-the-newsletter.com/feeds/abc.xml"
-    target_file: "topic1.xml"
+    target_file: "output_files/topic1.xml"
     online: True
     appending: True
   - source_file: "https://kill-the-newsletter.com/feeds/xyz.xml"
-    target_file: "topic2.xml"
+    target_file: "output_files/topic2.xml"
     online: True
     appending: True

@@ -1,11 +1,12 @@
 exclude = ["output_files", "f.py"]
+line-length = 79
 
 [format]
 docstring-code-format = true
 
 [lint]
 select = ["D"]
-ignore = ["D100"]
+ignore = ["D100", "D205", "D107", "D104"]
 
 [lint.pydocstyle]
 convention = "google"

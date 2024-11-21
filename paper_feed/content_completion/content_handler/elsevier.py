@@ -10,6 +10,7 @@ from .base import KeyedContentHandler
 
 class ElsevierContentHandler(KeyedContentHandler):
     """ContentHandler to access Elsevier data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
+
     def __init__(self):
         self.api_url = "https://api.elsevier.com/content/article/pii"
         self.api_max_records = (
@@ -24,7 +25,7 @@ class ElsevierContentHandler(KeyedContentHandler):
             self.use_api = False
 
     def _validate_api_key(self, api_key: str):
-        """Validate if the API key is valid by requesting a random paper.
+        """Validate if the API key is valid by requesting a random article.
 
         Args:
             api_key: API key to validate.
@@ -66,7 +67,7 @@ class ElsevierContentHandler(KeyedContentHandler):
         return pii
 
     def _get_request_urls(self, paper_list: list[Paper]) -> list[str]:
-        """
+        """Build request urls depending on if the API or direct page requests are used.
 
         Args:
             paper_list: List of papers
@@ -132,7 +133,8 @@ class ElsevierContentHandler(KeyedContentHandler):
             raise ValueError(
                 "The request to the Elsevier API was rejected. This usually occurs after a large amount "
                 "of requests. If this problem persists or occurs frequently, please consider using reducing the "
-                "number of simultaneously opened connections in utils.py."
+                "number of simultaneously opened connections in utils.py. Lower the feed_completion_request_limit to 4 "
+                "to make sure, that it does not fail."
             )
 
         data = content_item["full-text-retrieval-response"]["coredata"]

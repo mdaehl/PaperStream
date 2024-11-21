@@ -13,10 +13,13 @@ from .base import APIProceedingParser
 
 class IEEEParser(APIProceedingParser):
     """Parser for IEEE based publications."""
+
     def __init__(self, *args, **kwargs):
         self.api_url = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
         self.api_key = self.load_api_key()
-        self.max_records = 200  # Fixed Number of the API, increasing it does not work
+        self.max_records = (
+            200  # Fixed Number of the API, increasing it does not work
+        )
         super().__init__(*args, **kwargs)
 
     @property
@@ -151,13 +154,17 @@ class IEEEParser(APIProceedingParser):
         request_contents = list(chain.from_iterable(request_contents))
         return request_contents
 
-    def _parse_paper_content(self, paper_content: dict = None) -> Paper:
-        """
+    def _parse_paper_content(
+        self, paper_content: dict, paper_url: str | None = None
+    ) -> Paper:
+        """Parse paper content from content dictionary.
 
         Args:
-            paper_content:
+            paper_content: Paper content to parse.
+            paper_url: Url of the paper content to support parsing. Just used for debugging.
 
         Returns:
+            Parsed content as a Paper item.
 
         """
         title = paper_content["title"]
@@ -174,9 +181,8 @@ class IEEEParser(APIProceedingParser):
 
 
 class JournalIEEEParser(IEEEParser, ABC):
-    """
-    Parser for IEEE based journals, to allow issue specific parsing.
-    """
+    """Parser for IEEE based journals, to allow issue specific parsing."""
+
     def __init__(self, issue: int | None = None, *args, **kwargs):
         self.issue = issue
         super().__init__(*args, **kwargs)
@@ -223,9 +229,10 @@ class JournalIEEEParser(IEEEParser, ABC):
 
 class TPAMIParser(JournalIEEEParser):
     """Parser for the Transactions on Pattern Analysis and Machine Intelligence (TPAMI) journal."""
+
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "TPAMI"
 
     @property
@@ -244,9 +251,10 @@ class TPAMIParser(JournalIEEEParser):
 
 class IROSParser(IEEEParser):
     """Parser of the International Conference on Intelligent Robots and Systems (IROS)."""
+
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "IROS"
 
     @property
@@ -270,9 +278,10 @@ class IROSParser(IEEEParser):
 
 class ICRAParser(IEEEParser):
     """Parser of the International Conference on Robotics & Automation (ICRA)."""
+
     @property
     def proceeding_name(self) -> str:
-        """Returns: Name of the proceeding"""
+        """Returns: Name of the proceeding."""
         return "ICRA"
 
     @property
