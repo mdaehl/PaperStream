@@ -102,7 +102,8 @@ If you want to parse a single feed file there are 4 important flags:
 - ```-s```: The path of the source file (xml feed file produces by kill the newsletter), which can be a url.
 - ```-t```: The name of the target file, which is used in your feed reader later.
 - ```-o```: Information if the source file is stored online or locally.
-- ```-a``` should the result be appended to the existing target file or be overwritten
+- ```-a```: Should the result be appended to the existing target file or be overwritten
+- ```-f```: Force parsing and ignore known errors with the risk of less information completion
 
 The following code illustrates the usage with an example:
 ```shell

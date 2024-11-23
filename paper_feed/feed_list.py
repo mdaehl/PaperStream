@@ -21,6 +21,7 @@ class FeedList:
         appending: bool | None = None,
         remove_duplicates_within_feed: bool = True,
         remove_duplicates_across_feeds: bool = False,
+        force_content: bool = False,
     ):
         """Args:
         use_config_file: Whether to use the YAML config file for the feeds.
@@ -30,7 +31,10 @@ class FeedList:
         appending: Whether to append the content to an existing file or overwrite it, if no config file is used.
         remove_duplicates_within_feed: Whether to remove duplicate entries within a feed w.r.t. new entries.
         remove_duplicates_across_feeds: Whether to remove duplicate entries across feeds w.r.t. new entries.
+        force_content: Whether to force content to be retrieved or not.
         """
+        self.force_content = force_content
+
         # ensure there is just on feed input and the args match that
         if use_config_file and (
             source_file or target_file or online or appending
@@ -177,7 +181,7 @@ class FeedList:
         incomplete_paper_list = [
             feed.incomplete_feed_papers for feed in self.feeds
         ]
-        content_retriever = ContentCompletor(incomplete_paper_list)
+        content_retriever = ContentCompletor(incomplete_paper_list, force_content=self.force_content)
         contents = content_retriever.get_contents()
         content_retriever.assign_contents(contents=contents)
 

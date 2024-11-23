@@ -10,6 +10,7 @@ def parse_feed_list(
     appending: bool,
     remove_duplicates_within_feed: bool,
     remove_duplicates_across_feeds: bool,
+    force_content: bool
 ):
     """Parse the feed list w.r.t. the provided user input and save the feed files.
 
@@ -21,6 +22,7 @@ def parse_feed_list(
     appending: Whether to append the content to an existing file or overwrite it, if no config file is used.
     remove_duplicates_within_feed: Whether to remove duplicate entries within a feed w.r.t. new entries.
     remove_duplicates_across_feeds: Whether to remove duplicate entries across feeds w.r.t. new entries.
+    force_content: Whether to force content to be retrieved or not.
     """
     feed_list = FeedList(
         use_config_file=use_config_file,
@@ -30,6 +32,7 @@ def parse_feed_list(
         appending=appending,
         remove_duplicates_within_feed=remove_duplicates_within_feed,
         remove_duplicates_across_feeds=remove_duplicates_across_feeds,
+        force_content=force_content
     )
     feed_list.get_feed_data()
     feed_list.save_feeds()
@@ -74,6 +77,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Remove duplicates across feeds.",
     )
+    arg_parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        default=False,
+        help="Force content retrieval and ignore known errors which limit content retrieval.",
+    )
     input_args = arg_parser.parse_args()
 
     parse_feed_list(
@@ -84,4 +94,5 @@ if __name__ == "__main__":
         appending=input_args.append,
         remove_duplicates_within_feed=input_args.remove_within,
         remove_duplicates_across_feeds=input_args.remove_across,
+        force_content=input_args.force,
     )

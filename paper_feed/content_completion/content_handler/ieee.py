@@ -14,7 +14,12 @@ from .base import KeyedContentHandler
 class IEEEContentHandler(KeyedContentHandler):
     """ContentHandler to access IEEE data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
-    def __init__(self):
+    def __init__(self, force_content: bool = False):
+        """
+        Args:
+            force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
+        """
+        self.force_content = force_content
         self.api_url = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
         self.api_max_records = (
             200  # Fixed Number of the API, increasing it does not work
@@ -239,9 +244,8 @@ class IEEEContentHandler(KeyedContentHandler):
         )  # old publications sometimes do not have an abstract
         return {"title": title, "abstract": abstract, "authors": authors}
 
-    @staticmethod
     def _get_paper_data_from_web_content_item(
-        content_item: bs4.BeautifulSoup,
+        self, content_item: bs4.BeautifulSoup,
     ) -> dict:
         """Retrieve single paper data from content item via bs4.
 
@@ -253,12 +257,15 @@ class IEEEContentHandler(KeyedContentHandler):
 
         """
         if content_item.title.text == "Request Rejected":
-            raise ValueError(
-                "The request to the IEEE API was rejected. This usually occurs after a large amount of "
-                "requests. However, connecting and disconnection from a WIFI/Lan connection seems to fix "
-                "this problem. If this problem persists or occurs frequently, please consider"
-                "reducing the number of simultaneously opened connections in utils.py."
-            )
+            if self.force_content:
+                return {"title": None, "abstract": None, "authors": None}
+            else:
+                raise ValueError(
+                    "The request to the IEEE API was rejected. This usually occurs after a large amount of "
+                    "requests. However, connecting and disconnection from a WIFI/Lan connection seems to fix "
+                    "this problem. If this problem persists or occurs frequently, please consider"
+                    "reducing the number of simultaneously opened connections in utils.py."
+                )
         title = content_item.find("meta", property="og:title")["content"]
         abstract = content_item.find("meta", property="og:description")[
             "content"

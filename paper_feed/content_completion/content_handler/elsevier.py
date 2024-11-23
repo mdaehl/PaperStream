@@ -2,6 +2,7 @@ import json
 import re
 
 import requests
+import bs4
 
 from misc import settings
 from misc.utils import Paper
@@ -11,7 +12,12 @@ from .base import KeyedContentHandler
 class ElsevierContentHandler(KeyedContentHandler):
     """ContentHandler to access Elsevier data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
-    def __init__(self):
+    def __init__(self, force_content: bool = False):
+        """
+        Args:
+            force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
+        """
+        self.force_content = force_content
         self.api_url = "https://api.elsevier.com/content/article/pii"
         self.api_max_records = (
             200  # Fixed Number of the API, increasing it does not work
@@ -130,12 +136,15 @@ class ElsevierContentHandler(KeyedContentHandler):
 
         """
         if content_item.get("error-response") is not None:
-            raise ValueError(
-                "The request to the Elsevier API was rejected. This usually occurs after a large amount "
-                "of requests. If this problem persists or occurs frequently, please consider using reducing the "
-                "number of simultaneously opened connections in utils.py. Lower the feed_completion_request_limit to 4 "
-                "to make sure, that it does not fail."
-            )
+            if self.force_content:
+                return {"title": None, "abstract": None, "authors": None}
+            else:
+                raise ValueError(
+                    "The request to the Elsevier API was rejected. This usually occurs after a large amount "
+                    "of requests. If this problem persists or occurs frequently, please consider using reducing the "
+                    "number of simultaneously opened connections in utils.py. Lower the feed_completion_request_limit to 4 "
+                    "to make sure, that it does not fail."
+                )
 
         data = content_item["full-text-retrieval-response"]["coredata"]
         title = data["dc:title"].strip()
