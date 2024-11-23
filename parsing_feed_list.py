@@ -40,7 +40,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--use_config",
         "-u",
-        type=bool,
+        action="store_true",
         help="Use mapping of feeds from config file.",
     )
     arg_parser.add_argument(
@@ -55,23 +55,23 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--online",
         "-o",
-        type=bool,
+        action="store_true",
         help="Whether the feed file is stored online.",
     )
     arg_parser.add_argument(
         "-a",
         "--append",
-        type=bool,
+        action="store_true",
         help="Append new entries to current feed file",
     )
     arg_parser.add_argument(
         "--remove_within",
-        type=bool,
+        action="store_true",
         help="Remove duplicates within feeds.",
     )
     arg_parser.add_argument(
         "--remove_across",
-        type=bool,
+        action="store_true",
         help="Remove duplicates across feeds.",
     )
     input_args = arg_parser.parse_args()
