@@ -1,6 +1,7 @@
 import asyncio
 import warnings
 from dataclasses import dataclass
+import ssl
 
 import aiohttp
 import bs4
@@ -122,8 +123,12 @@ async def get_urls_content(
     if not params_list:
         params_list = len(urls) * [None]
 
+    ssl_context = ssl.create_default_context()
+    ssl_context.set_alpn_protocols(["http/1.1"])
+
     connector = aiohttp.TCPConnector(
         limit=request_limit,
+        ssl=ssl_context,
         verify_ssl=settings.verify_ssl,
         limit_per_host=request_limit,
     )
