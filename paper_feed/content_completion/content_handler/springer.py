@@ -64,7 +64,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         if self.use_api:
             return self._get_paper_dois(paper_list)
         else:
-            super()._get_request_identifiers(paper_list)
+            return super()._get_request_identifiers(paper_list)
 
     def _get_request_urls(self, paper_list: list[Paper]) -> list[str]:
         """Build request urls depending on if the API or direct page requests are used.

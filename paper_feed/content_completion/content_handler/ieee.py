@@ -84,7 +84,7 @@ class IEEEContentHandler(KeyedContentHandler):
         if self.use_api:
             return self._get_article_numbers_list(paper_list)
         else:
-            super()._get_request_identifiers(paper_list)
+            return super()._get_request_identifiers(paper_list)
 
     def _get_article_numbers_list(
         self, paper_list: list[Paper]
