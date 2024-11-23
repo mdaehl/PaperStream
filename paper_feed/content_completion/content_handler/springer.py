@@ -226,7 +226,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
                 for content_item in article_contents
             ]
         else:
-            content = bs4.BeautifulSoup(content, features="xml")
+            content = bs4.BeautifulSoup(content, features="lxml")
             paper_data_list = [
                 self._get_paper_data_from_web_content_item(content)
             ]
