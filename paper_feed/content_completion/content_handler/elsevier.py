@@ -83,13 +83,38 @@ class ElsevierContentHandler(KeyedContentHandler):
 
         """
         if self.use_api:
-            piis = [self.get_pii_from_url(paper.url) for paper in paper_list]
-            request_urls = [
-                f"{self.api_url}/{pii}?apiKey={self.api_key}" for pii in piis
-            ]
-            return request_urls
+            return self._get_api_request_urls(paper_list)
         else:
-            return []
+            return self._get_webscrape_request_urls(paper_list)
+
+    def _get_api_request_urls(self, paper_list: list[Paper]) -> list[str]:
+        """Build request urls for the API, where multiple papers are grouped to reduce the number of requests. Required parameters are also incorporated.
+
+        Args:
+            paper_list: List of papers
+
+        Returns:
+            URLs required for the requests
+
+        """
+        piis = [self.get_pii_from_url(paper.url) for paper in paper_list]
+        request_urls = [
+            f"{self.api_url}/{pii}?apiKey={self.api_key}" for pii in piis
+        ]
+        return request_urls
+
+    @staticmethod
+    def _get_webscrape_request_urls(paper_list: list[Paper]) -> list[str]:
+        """Build request urls for webscraping. Each url requests solely a single paper.
+
+        Args:
+            paper_list: List of papers
+
+        Returns:
+            URLs required for the requests
+
+        """
+        return [paper.url for paper in paper_list]
 
     def _get_request_headers(self, paper_list: list[Paper]) -> list[dict]:
         """Build request headers to retrieve the publisher related paper information. Json as return format is desired.
@@ -105,7 +130,7 @@ class ElsevierContentHandler(KeyedContentHandler):
             headers = {"Accept": "application/json"}
             return len(paper_list) * [headers]
         else:
-            return []
+            return len(paper_list) * [settings.headers]
 
     def get_paper_contents_from_request_content(
         self, content: str, content_ids: list[str] | None = None
@@ -120,12 +145,17 @@ class ElsevierContentHandler(KeyedContentHandler):
             List containing paper data as dictionaries.
 
         """
-        json_content = json.loads(content)
-        paper_data_list = [self.get_paper_data_from_content_item(json_content)]
+        if self.use_api:
+            json_content = json.loads(content)
+            paper_data_list = [self._get_paper_data_from_api_content_item(json_content)]
+        else:
+            content = bs4.BeautifulSoup(content, features="lxml")
+            paper_data_list = [
+                self._get_paper_data_from_web_content_item(content)
+            ]
         return paper_data_list
 
-    @staticmethod
-    def get_paper_data_from_content_item(content_item: dict) -> dict:
+    def _get_paper_data_from_api_content_item(self, content_item: dict) -> dict:
         """Retrieve single paper data from content selecting the json attributes.
 
         Args:
@@ -152,4 +182,24 @@ class ElsevierContentHandler(KeyedContentHandler):
         authors = list(map(lambda x: x["$"], authors_item))
         abstract = data["dc:description"].strip()
         abstract = re.sub(r"\s+", " ", abstract)
+        return {"title": title, "abstract": abstract, "authors": authors}
+
+    @staticmethod
+    def _get_paper_data_from_web_content_item(
+        content_item: bs4.BeautifulSoup,
+    ) -> dict:
+        """Retrieve single paper data from content item via bs4.
+
+        Args:
+            content_item: bs4 Tag to retrieve relevant paper data from
+
+        Returns:
+            Paper data as dictionary
+
+        """
+        abstract = content_item.find("h2", string="Abstract").find_next_sibling().text
+        title = content_item.find("meta", property="og:title")["content"]
+        names = content_item.find_all("span", {"class": "given-name"})
+        surnames = content_item.find_all("span", {"class": "text surname"})
+        authors = [f"{name.text} {surname.text}" for name, surname in zip(names, surnames)]
         return {"title": title, "abstract": abstract, "authors": authors}

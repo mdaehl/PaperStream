@@ -81,7 +81,7 @@ additional details such as authors, abstracts, and links to full papers for supp
 Currently, information completion is supported for the following publishers:
 - Arxiv (does not require an API key) - Thank you for arXiv for use of its open access interoperability.
 - IEEE (register [here](https://developer.ieee.org/docs))
-- Elsevier / Sciencedirect (register [here](https://dev.elsevier.com/)); webparsing is not supported as simple requests are blocked
+- Elsevier / Sciencedirect (register [here](https://dev.elsevier.com/))
 - Springer / Nature (register [here](https://dev.springernature.com/))
 
 While some data can be retrieved without APIs, using API keys is strongly recommended for a more stable and faster 
