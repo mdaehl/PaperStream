@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 import yaml
+import os
 
 from misc import settings
 from misc.utils import Paper
@@ -108,10 +109,16 @@ class KeyedContentHandler(ContentHandler):
             API key of the provided name if it exists, otherwise None.
 
         """
-        with open(settings.credentials_file, "r") as f:
-            content = yaml.safe_load(f)
-        api_key = content.get(api_key_name)
-        if self._validate_api_key(api_key):
-            return api_key
-        else:
-            return None
+        file_path = settings.credentials_file
+
+        api_key = None
+        if os.path.exists(file_path):
+            with open(settings.credentials_file, "r") as f:
+                content = yaml.safe_load(f)
+
+            if content:
+                api_key = content.get(api_key_name)
+                if api_key and self._validate_api_key(api_key):
+                    return api_key
+
+        return api_key
