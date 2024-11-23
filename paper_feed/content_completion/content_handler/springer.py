@@ -279,20 +279,21 @@ class SpringerContentHandler(SpringerBaseContentHandler):
             Paper data as dictionary
 
         """
-        title = content_item.find("meta", property="og:title")["content"]
-        abstract = (
-            content_item.find("div", class_="c-article-section__content")
-            .find_next("p")
-            .get_text(strip=True)
-        )
-        authors = list(
-            map(
-                lambda x: x["content"],
-                content_item.find_all(
-                    "meta", attrs={"name": "citation_author"}
-                ),
+        # ignore books, as they usually arise from faulty scholar links which do not forward correctly
+        url = content_item.find("meta", property="og:url")["content"]
+        if "book" in url:
+            title = abstract = authors = None
+        else:
+            title = content_item.find("meta", property="og:title")["content"]
+            abstract = content_item.find("meta", property="og:description")["content"]
+            authors = list(
+                map(
+                    lambda x: x["content"],
+                    content_item.find_all(
+                        "meta", attrs={"name": "citation_author"}
+                    ),
+                )
             )
-        )
         return {"title": title, "abstract": abstract, "authors": authors}
 
 
