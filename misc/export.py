@@ -64,8 +64,8 @@ class AtomFileExporter(FileExporter):
             f"<title>{self._escape_xml(paper.title)}</title> "
             f"<summary>{self._escape_xml(abstract.strip())} </summary> "
             f"{authors_entry} "
-            f'<url href="{self._escape_xml(paper.url)}" rel="alternate" type="text/html"/>  '
-            f'<url title="pdf" href="{self._escape_xml(paper.url)}" rel="related" type="application/pdf"/>'
+            f'<link href="{self._escape_xml(paper.url)}" rel="alternate" type="text/html"/>  '
+            f'<link title="pdf" href="{self._escape_xml(paper.url)}" rel="related" type="application/pdf"/>'
             f"</entry>"
         )
 
