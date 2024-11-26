@@ -37,7 +37,7 @@ are:
   - _ICRA_ (all - starting 1984)
   - _TPAMI_ (all - starting 1979)
 
-*Indicates that the request_limit in ```config.py``` might need to be decreased due to DDOS protections or timeouts.
+*Indicates that the request_limit in ```settings.py``` might need to be decreased due to DDOS protections or timeouts.
 
 While we do not support all years or all proceedings from each publisher by default, most classes are easily extendable 
 for those requirements. The openreview API can be clunky due to inconsistent behaviour. We also provide already parsed 
