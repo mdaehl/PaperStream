@@ -267,9 +267,8 @@ class IEEEContentHandler(KeyedContentHandler):
                     "reducing the number of simultaneously opened connections in utils.py."
                 )
         title = content_item.find("meta", property="og:title")["content"]
-        # remove italics from title
-        title = re.sub("<i>", "", title)
-        title = re.sub("</i>", "", title)
+        # remove any styling (<xxx>, <\xxx>) from title
+        title = re.sub(r"<[^>]+>", "", title)
 
         abstract = content_item.find("meta", property="og:description")[
             "content"
