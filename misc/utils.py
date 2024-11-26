@@ -138,6 +138,8 @@ async def get_urls_content(
             fetch_url(session, url, headers, params)
             for url, headers, params in zip(urls, headers_list, params_list)
         ]
-        html_contents = await tqdm_asyncio.gather(*tasks)
+        html_contents = await tqdm_asyncio.gather(
+            *tasks, desc="Requesting Paper Contents"
+        )
 
         return html_contents
