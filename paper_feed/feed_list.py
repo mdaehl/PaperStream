@@ -4,9 +4,9 @@ from itertools import chain
 import yaml
 from tqdm import tqdm
 
+from misc import settings
 from .content_completion import ContentCompletor
 from .feed import Feed
-from misc import settings
 
 
 class FeedList:
@@ -181,7 +181,9 @@ class FeedList:
         incomplete_paper_list = [
             feed.incomplete_feed_papers for feed in self.feeds
         ]
-        content_retriever = ContentCompletor(incomplete_paper_list, force_content=self.force_content)
+        content_retriever = ContentCompletor(
+            incomplete_paper_list, force_content=self.force_content
+        )
         contents = content_retriever.get_contents()
         content_retriever.assign_contents(contents=contents)
 

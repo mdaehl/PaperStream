@@ -285,7 +285,9 @@ class SpringerContentHandler(SpringerBaseContentHandler):
             title = abstract = authors = None
         else:
             title = content_item.find("meta", property="og:title")["content"]
-            abstract = content_item.find("meta", property="og:description")["content"]
+            abstract = content_item.find("meta", property="og:description")[
+                "content"
+            ]
             authors = list(
                 map(
                     lambda x: x["content"],

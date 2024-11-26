@@ -5,8 +5,8 @@ from itertools import batched
 
 import bs4
 import requests
-from misc import settings
 
+from misc import settings
 from misc.utils import Paper
 from .base import KeyedContentHandler
 
@@ -15,9 +15,8 @@ class IEEEContentHandler(KeyedContentHandler):
     """ContentHandler to access IEEE data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
     def __init__(self, force_content: bool = False):
-        """
-        Args:
-            force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
+        """Args:
+        force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
         """
         self.force_content = force_content
         self.api_url = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
@@ -245,7 +244,8 @@ class IEEEContentHandler(KeyedContentHandler):
         return {"title": title, "abstract": abstract, "authors": authors}
 
     def _get_paper_data_from_web_content_item(
-        self, content_item: bs4.BeautifulSoup,
+        self,
+        content_item: bs4.BeautifulSoup,
     ) -> dict:
         """Retrieve single paper data from content item via bs4.
 

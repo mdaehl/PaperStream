@@ -1,8 +1,8 @@
 import json
 import re
 
-import requests
 import bs4
+import requests
 
 from misc import settings
 from misc.utils import Paper
@@ -13,9 +13,8 @@ class ElsevierContentHandler(KeyedContentHandler):
     """ContentHandler to access Elsevier data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
     def __init__(self, force_content: bool = False):
-        """
-        Args:
-            force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
+        """Args:
+        force_content: Whether to force content to be retrieved or not. Failed content is returned as None. By default, errors are raised.
         """
         self.force_content = force_content
         self.api_url = "https://api.elsevier.com/content/article/pii"
@@ -147,7 +146,9 @@ class ElsevierContentHandler(KeyedContentHandler):
         """
         if self.use_api:
             json_content = json.loads(content)
-            paper_data_list = [self._get_paper_data_from_api_content_item(json_content)]
+            paper_data_list = [
+                self._get_paper_data_from_api_content_item(json_content)
+            ]
         else:
             content = bs4.BeautifulSoup(content, features="lxml")
             paper_data_list = [
@@ -155,7 +156,9 @@ class ElsevierContentHandler(KeyedContentHandler):
             ]
         return paper_data_list
 
-    def _get_paper_data_from_api_content_item(self, content_item: dict) -> dict:
+    def _get_paper_data_from_api_content_item(
+        self, content_item: dict
+    ) -> dict:
         """Retrieve single paper data from content selecting the json attributes.
 
         Args:
@@ -197,9 +200,14 @@ class ElsevierContentHandler(KeyedContentHandler):
             Paper data as dictionary
 
         """
-        abstract = content_item.find("h2", string="Abstract").find_next_sibling().text
+        abstract = (
+            content_item.find("h2", string="Abstract").find_next_sibling().text
+        )
         title = content_item.find("meta", property="og:title")["content"]
         names = content_item.find_all("span", {"class": "given-name"})
         surnames = content_item.find_all("span", {"class": "text surname"})
-        authors = [f"{name.text} {surname.text}" for name, surname in zip(names, surnames)]
+        authors = [
+            f"{name.text} {surname.text}"
+            for name, surname in zip(names, surnames)
+        ]
         return {"title": title, "abstract": abstract, "authors": authors}

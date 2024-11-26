@@ -1,7 +1,7 @@
 import asyncio
+import ssl
 import warnings
 from dataclasses import dataclass
-import ssl
 
 import aiohttp
 import bs4

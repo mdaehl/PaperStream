@@ -1,7 +1,7 @@
+import os
 from abc import abstractmethod
 
 import yaml
-import os
 
 from misc import settings
 from misc.utils import Paper

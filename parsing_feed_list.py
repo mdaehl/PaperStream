@@ -1,4 +1,5 @@
 import argparse
+
 from paper_feed import FeedList
 
 
@@ -10,7 +11,7 @@ def parse_feed_list(
     appending: bool,
     remove_duplicates_within_feed: bool,
     remove_duplicates_across_feeds: bool,
-    force_content: bool
+    force_content: bool,
 ):
     """Parse the feed list w.r.t. the provided user input and save the feed files.
 
@@ -32,7 +33,7 @@ def parse_feed_list(
         appending=appending,
         remove_duplicates_within_feed=remove_duplicates_within_feed,
         remove_duplicates_across_feeds=remove_duplicates_across_feeds,
-        force_content=force_content
+        force_content=force_content,
     )
     feed_list.get_feed_data()
     feed_list.save_feeds()

@@ -4,9 +4,9 @@ from urllib import parse
 import bs4
 import requests
 
+from misc import settings
 from misc.export import AtomFileExporter
 from misc.utils import Paper
-from misc import settings
 
 
 class Feed:

@@ -5,6 +5,8 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import List
 
+from tqdm import tqdm
+
 from misc import utils, settings
 from misc.utils import Paper
 from .content_handler import (
@@ -19,7 +21,9 @@ from .content_handler import (
 class ContentCompletor:
     """Content completor to get missing data of incomplete papers from Google Scholar notifications."""
 
-    def __init__(self, paper_lists: List[List[Paper]], force_content: bool = False):
+    def __init__(
+        self, paper_lists: List[List[Paper]], force_content: bool = False
+    ):
         """Initialize a ContentCompletor object.
 
         Args:
@@ -31,7 +35,9 @@ class ContentCompletor:
         self.content_handlers = {
             "arxiv.org": ArxivContentHandler(),
             "ieee.org": IEEEContentHandler(force_content=force_content),
-            "sciencedirect.com": ElsevierContentHandler(force_content=force_content),
+            "sciencedirect.com": ElsevierContentHandler(
+                force_content=force_content
+            ),
             "springer.com": SpringerContentHandler(),
             "nature.com": NatureContentHandler(),
         }
