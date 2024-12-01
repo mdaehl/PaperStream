@@ -4,8 +4,7 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 from typing import List
-
-from tqdm import tqdm
+import warnings
 
 from misc import utils, settings
 from misc.utils import Paper
@@ -177,24 +176,27 @@ class ContentCompletor:
                 feed_idx, paper_idx = two_d_idx
                 selected_paper = self.paper_lists[feed_idx][paper_idx]
 
-                self._validate_assignment(selected_paper, paper_data)
-
-                selected_paper.update(paper_data)
+                if self._validate_assignment(selected_paper, paper_data):
+                    selected_paper.update(paper_data)
 
     @staticmethod
-    def _validate_assignment(selected_paper: Paper, paper_data: dict) -> None:
+    def _validate_assignment(selected_paper: Paper, paper_data: dict) -> bool:
         """Validate the assignment of the new content to the existing paper.
 
         Args:
             selected_paper: Paper to which the data is assigned.
             paper_data: Data which is used for updating/assigned new information.
 
+        Returns:
+            Whether the assignment is valid and the data should be updated.
         """
+        unprocessed_title = selected_paper.title
+        processed_title = paper_data["title"]
         new_title = deepcopy(
-            paper_data["title"]
+            processed_title
         )  # avoid altering the original data
         old_title = deepcopy(
-            selected_paper.title
+            unprocessed_title
         )  # avoid altering the original data
 
         # compare bare strings (without spacing, case-sensitivity or special characters)
@@ -203,4 +205,30 @@ class ContentCompletor:
 
         # sometimes the actual title is longer/shorter compared to the requested one
         # therefore check if either one is in the other one
-        assert old_title in new_title or new_title in old_title
+        if not (old_title in new_title or new_title in old_title):
+            # use user input for manual validation/selection
+            while True:
+                user_input = input(
+                    f"The titles of the original title and the updated one do not seem to match. The unprocessed title "
+                    f"is {unprocessed_title} and the processed title is {processed_title}. Please check at the URL "
+                    f"{selected_paper.url} if they refer to the same paper but might just be different versions. If "
+                    f"you would like to match them, enter 'yes' and 'no' if the processed content should be ignored. "
+                    f"You can also 'cancel' to check the for a potential error source yourself and stop the ongoing "
+                    f"processing."
+                ).strip()
+
+                if user_input == "yes":
+                    return True
+                elif user_input == "no":
+                    warnings.warn(
+                        f"The paper {unprocessed_title} is not updated with extra content."
+                    )
+                    return False
+                elif user_input == "cancel":
+                    raise ValueError(
+                        f"Original title ({unprocessed_title}) and updated title ({processed_title}) do not match."
+                    )
+                else:
+                    print(
+                        "Invalid input. Please type 'yes', 'no', or 'cancel'."
+                    )
