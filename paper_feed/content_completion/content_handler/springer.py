@@ -279,10 +279,14 @@ class SpringerContentHandler(SpringerBaseContentHandler):
             Paper data as dictionary
 
         """
+        # check if actual content was retrieved (pages are sometimes deleted later)
+        if content_item.text == "":
+            return {"title": None, "abstract": None, "authors": None}
+
         # ignore books, as they usually arise from faulty scholar links which do not forward correctly
         url = content_item.find("meta", property="og:url")["content"]
         if "book" in url:
-            title = abstract = authors = None
+            return {"title": None, "abstract": None, "authors": None}
         else:
             title = content_item.find("meta", property="og:title")["content"]
             abstract = content_item.find("meta", property="og:description")[
@@ -296,7 +300,7 @@ class SpringerContentHandler(SpringerBaseContentHandler):
                     ),
                 )
             )
-        return {"title": title, "abstract": abstract, "authors": authors}
+            return {"title": title, "abstract": abstract, "authors": authors}
 
 
 class NatureContentHandler(SpringerBaseContentHandler):
