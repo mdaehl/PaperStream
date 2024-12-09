@@ -205,7 +205,9 @@ class ContentCompletor:
 
         # sometimes the actual title is longer/shorter compared to the requested one
         # therefore check if either one is in the other one
-        if not (old_title in new_title or new_title in old_title):
+        if old_title in new_title or new_title in old_title:
+            return True
+        else:
             # use user input for manual validation/selection
             while True:
                 user_input = input(
