@@ -5,6 +5,7 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import List
 import warnings
+import textwrap
 
 from misc import utils, settings
 from misc.utils import Paper
@@ -209,16 +210,18 @@ class ContentCompletor:
             return True
         else:
             # use user input for manual validation/selection
+            user_input = input(
+                textwrap.fill(
+                    f"\nThe titles of the original title and the updated one do not seem to match. The "
+                    f"unprocessed title is '{unprocessed_title}' and the processed title is '{processed_title}'. "
+                    f"Please check at the URL {selected_paper.url} if they refer to the same paper but might just "
+                    f"be different versions. If you would like to match them, enter 'yes' and 'no' if the processed"
+                    f" content should be ignored. You can also 'cancel' to check the for a potential error source "
+                    f"yourself and stop the ongoing processing.\n",
+                    width=80,
+                )
+            )
             while True:
-                user_input = input(
-                    f"The titles of the original title and the updated one do not seem to match. The unprocessed title "
-                    f"is {unprocessed_title} and the processed title is {processed_title}. Please check at the URL "
-                    f"{selected_paper.url} if they refer to the same paper but might just be different versions. If "
-                    f"you would like to match them, enter 'yes' and 'no' if the processed content should be ignored. "
-                    f"You can also 'cancel' to check the for a potential error source yourself and stop the ongoing "
-                    f"processing."
-                ).strip()
-
                 if user_input == "yes":
                     return True
                 elif user_input == "no":
@@ -231,6 +234,6 @@ class ContentCompletor:
                         f"Original title ({unprocessed_title}) and updated title ({processed_title}) do not match."
                     )
                 else:
-                    print(
-                        "Invalid input. Please type 'yes', 'no', or 'cancel'."
+                    user_input = input(
+                        "\nInvalid input. Please type 'yes', 'no', or 'cancel'.\n"
                     )
