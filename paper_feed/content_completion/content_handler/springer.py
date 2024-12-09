@@ -62,7 +62,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
 
         """
         if self.use_api:
-            return self._get_paper_dois(paper_list)
+            return self._get_paper_dois(paper_list, group_by_request=True)
         else:
             return super()._get_request_identifiers(paper_list)
 
@@ -96,8 +96,9 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         else:
             return len(paper_list) * [settings.headers]
 
-    @staticmethod
-    def _get_webscrape_request_urls(paper_list: list[Paper]) -> list[str]:
+    def _get_webscrape_request_urls(
+        self, paper_list: list[Paper]
+    ) -> list[str]:
         """Get urls for webscraping. Each url requests solely a single paper.
 
         Args:
@@ -107,7 +108,11 @@ class SpringerBaseContentHandler(KeyedContentHandler):
             URLs required for the requests
 
         """
-        return [paper.url for paper in paper_list]
+        # sometimes the url points to the pdf to mitigate this we use the default redirection based on the doi
+        dois_list = self._get_paper_dois(paper_list, group_by_request=False)
+        base_url = "https://link.springer.com"
+        urls = [f"{base_url}/{doi}" for doi in dois_list]
+        return urls
 
     def _get_api_request_urls(self, paper_list: list[Paper]) -> list[str]:
         """Build request urls for the API, where multiple papers are grouped to reduce the number of requests. Required parameters are also incorporated.
@@ -119,7 +124,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
             URLs required for the requests
 
         """
-        dois_list = self._get_paper_dois(paper_list)
+        dois_list = self._get_paper_dois(paper_list, group_by_request=True)
         dois_list = [
             [f"doi:{doi}" for doi in doi_items] for doi_items in dois_list
         ]
@@ -172,14 +177,17 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         return {"title": title, "abstract": abstract, "authors": authors}
 
     @abstractmethod
-    def _get_paper_dois(self, paper_list: list[Paper]) -> list[list[str]]:
+    def _get_paper_dois(
+        self, paper_list: list[Paper], group_by_request: bool
+    ) -> list[list[str]]:
         """Abstract method to get the paper DOIs per request from the URLs.
 
         Args:
             paper_list: List of papers
+            group_by_request: Group the DOIs w.r.t. to the request size.
 
         Returns:
-            Nested list containing the paper DOIs per request
+            (Nested) list containing the paper DOIs per request
 
         """
         raise NotImplementedError
@@ -237,14 +245,17 @@ class SpringerBaseContentHandler(KeyedContentHandler):
 class SpringerContentHandler(SpringerBaseContentHandler):
     """ContentHandler to access Springer data. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
-    def _get_paper_dois(self, paper_list: list[Paper]) -> list[list[str]]:
+    def _get_paper_dois(
+        self, paper_list: list[Paper], group_by_request: bool = True
+    ) -> list[list[str]] | list[str]:
         """Get the paper DOIs per request from the URLs.
 
         Args:
             paper_list: List of papers
+            group_by_request: Group the DOIs w.r.t. to the request size. Default is True.
 
         Returns:
-            Nested list containing the paper DOIs per request
+            (Nested) list containing the paper DOIs per request
 
         """
         paper_dois = []
@@ -262,9 +273,15 @@ class SpringerContentHandler(SpringerBaseContentHandler):
             doi_preface = paper_url.split("/")[-2]
             paper_dois.append(f"{doi_preface}/{sub_doi}")
 
-        return list(
-            map(lambda x: list(x), batched(paper_dois, self.api_max_records))
-        )
+        if group_by_request:
+            return list(
+                map(
+                    lambda x: list(x),
+                    batched(paper_dois, self.api_max_records),
+                )
+            )
+        else:
+            return paper_dois
 
     @staticmethod
     def _get_paper_data_from_web_content_item(
@@ -306,14 +323,17 @@ class SpringerContentHandler(SpringerBaseContentHandler):
 class NatureContentHandler(SpringerBaseContentHandler):
     """ContentHandler to access Nature data, which is based on Springer. It does work with and without an API key, though the API version is recommended for stability reasons. The API limit is extremely high, hence, it should not be a limitation."""
 
-    def _get_paper_dois(self, paper_list: list[Paper]) -> list[list[str]]:
+    def _get_paper_dois(
+        self, paper_list: list[Paper], group_by_request: bool = True
+    ) -> list[list[str]] | list[str]:
         """Get the paper DOIs per request from the URLs.
 
         Args:
             paper_list: List of papers
+            group_by_request: Group the DOIs w.r.t. to the request size. Default is True.
 
         Returns:
-            Nested list containing the paper DOIs per request
+            (Nested) list containing the paper DOIs per request
 
         """
         paper_dois = []
@@ -331,9 +351,15 @@ class NatureContentHandler(SpringerBaseContentHandler):
             doi_preface = "10.1038"  # fixed DOI of nature
             paper_dois.append(f"{doi_preface}/{sub_doi}")
 
-        return list(
-            map(lambda x: list(x), batched(paper_dois, self.api_max_records))
-        )
+        if group_by_request:
+            return list(
+                map(
+                    lambda x: list(x),
+                    batched(paper_dois, self.api_max_records),
+                )
+            )
+        else:
+            return paper_dois
 
     @staticmethod
     def _get_paper_data_from_web_content_item(
