@@ -189,7 +189,7 @@ class FeedList:
 
     def _print_stats(self) -> None:
         """Print all update statistics, after parsing the feed list to inform the user about changes."""
-        print("Update statistics:")
+        print("\nUpdate statistics:")
         for feed in self.feeds:
             print(f"{feed.target_file}: {feed.n_new_papers} new papers")
 

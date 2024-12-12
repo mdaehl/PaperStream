@@ -297,7 +297,10 @@ class SpringerContentHandler(SpringerBaseContentHandler):
 
         """
         # check if actual content was retrieved (pages are sometimes deleted later)
-        if content_item.text == "" or content_item.title.text in ["Page Not Found", "Error - Springer"]:
+        if content_item.text == "" or content_item.title.text in [
+            "Page Not Found",
+            "Error - Springer",
+        ]:
             return {"title": None, "abstract": None, "authors": None}
 
         # ignore books, as they usually arise from faulty scholar links which do not forward correctly
