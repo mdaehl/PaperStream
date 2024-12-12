@@ -306,9 +306,11 @@ class SpringerContentHandler(SpringerBaseContentHandler):
             return {"title": None, "abstract": None, "authors": None}
         else:
             title = content_item.find("meta", property="og:title")["content"]
-            abstract = content_item.find("meta", property="og:description")[
-                "content"
-            ]
+            abstract = (
+                content_item.find("section", {"data-title": "Abstract"})
+                .find("p")
+                .text
+            )
             authors = list(
                 map(
                     lambda x: x["content"],
