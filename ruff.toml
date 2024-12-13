@@ -1,5 +1,5 @@
-exclude = ["output_files", "f.py"]
-line-length = 79
+exclude = ["output_files"]
+line-length = 88
 
 [format]
 docstring-code-format = true

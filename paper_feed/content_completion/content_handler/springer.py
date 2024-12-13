@@ -49,9 +49,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         else:
             return False
 
-    def _get_request_identifiers(
-        self, paper_list: list[Paper]
-    ) -> list[list[str]]:
+    def _get_request_identifiers(self, paper_list: list[Paper]) -> list[list[str]]:
         """Build request identifiers to be able to subsequently assign the individual papers of combined requests. If the API is used, the DOIs are stored as identification info. Otherwise, the super method is used, as no identification for single paper requests is needed.
 
         Args:
@@ -96,9 +94,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
         else:
             return len(paper_list) * [settings.headers]
 
-    def _get_webscrape_request_urls(
-        self, paper_list: list[Paper]
-    ) -> list[str]:
+    def _get_webscrape_request_urls(self, paper_list: list[Paper]) -> list[str]:
         """Get urls for webscraping. Each url requests solely a single paper.
 
         Args:
@@ -125,9 +121,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
 
         """
         dois_list = self._get_paper_dois(paper_list, group_by_request=True)
-        dois_list = [
-            [f"doi:{doi}" for doi in doi_items] for doi_items in dois_list
-        ]
+        dois_list = [[f"doi:{doi}" for doi in doi_items] for doi_items in dois_list]
 
         request_urls = []
         for dois in dois_list:
@@ -137,9 +131,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
                 "p": self.api_max_records,
             }
             request_urls.append(
-                requests.Request("GET", self.api_url, params=params)
-                .prepare()
-                .url
+                requests.Request("GET", self.api_url, params=params).prepare().url
             )
 
         return request_urls
@@ -235,9 +227,7 @@ class SpringerBaseContentHandler(KeyedContentHandler):
             ]
         else:
             content = bs4.BeautifulSoup(content, features="lxml")
-            paper_data_list = [
-                self._get_paper_data_from_web_content_item(content)
-            ]
+            paper_data_list = [self._get_paper_data_from_web_content_item(content)]
 
         return paper_data_list
 
@@ -310,16 +300,12 @@ class SpringerContentHandler(SpringerBaseContentHandler):
         else:
             title = content_item.find("meta", property="og:title")["content"]
             abstract = (
-                content_item.find("section", {"data-title": "Abstract"})
-                .find("p")
-                .text
+                content_item.find("section", {"data-title": "Abstract"}).find("p").text
             )
             authors = list(
                 map(
                     lambda x: x["content"],
-                    content_item.find_all(
-                        "meta", attrs={"name": "citation_author"}
-                    ),
+                    content_item.find_all("meta", attrs={"name": "citation_author"}),
                 )
             )
             return {"title": title, "abstract": abstract, "authors": authors}
@@ -379,12 +365,8 @@ class NatureContentHandler(SpringerBaseContentHandler):
             Paper data as dictionary
 
         """
-        title = content_item.find("meta", attrs={"name": "dc.title"})[
-            "content"
-        ]
-        abstract = content_item.find("meta", attrs={"name": "description"})[
-            "content"
-        ]
+        title = content_item.find("meta", attrs={"name": "dc.title"})["content"]
+        abstract = content_item.find("meta", attrs={"name": "description"})["content"]
         authors = list(
             map(
                 lambda x: x["content"],

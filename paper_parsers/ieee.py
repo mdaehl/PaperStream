@@ -17,9 +17,7 @@ class IEEEParser(APIProceedingParser):
     def __init__(self, *args, **kwargs):
         self.api_url = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
         self.api_key = self.load_api_key()
-        self.max_records = (
-            200  # Fixed Number of the API, increasing it does not work
-        )
+        self.max_records = 200  # Fixed Number of the API, increasing it does not work
         super().__init__(*args, **kwargs)
 
     @property

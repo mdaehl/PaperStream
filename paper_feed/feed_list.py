@@ -36,9 +36,7 @@ class FeedList:
         self.force_content = force_content
 
         # ensure there is just on feed input and the args match that
-        if use_config_file and (
-            source_file or target_file or online or appending
-        ):
+        if use_config_file and (source_file or target_file or online or appending):
             raise ValueError(
                 "You cannot use the config file and provide additional attributes."
             )
@@ -62,10 +60,7 @@ class FeedList:
         # duplicate handling
         self.remove_duplicates_within_feed = remove_duplicates_within_feed
         self.remove_duplicates_across_feeds = remove_duplicates_across_feeds
-        if (
-            self.remove_duplicates_within_feed
-            and remove_duplicates_across_feeds
-        ):
+        if self.remove_duplicates_within_feed and remove_duplicates_across_feeds:
             warnings.warn(
                 "Duplicate removal within and across feeds was activated, therefore remove across feeds is selected."
             )
@@ -96,9 +91,7 @@ class FeedList:
 
         """
         try:
-            return yaml.safe_load(open(settings.feed_config_file)).get(
-                "pairings"
-            )
+            return yaml.safe_load(open(settings.feed_config_file)).get("pairings")
         except FileNotFoundError:
             raise FileNotFoundError(
                 f"The file {settings.feed_config_file} was not found. Please check again or adapt the path in the config file."
@@ -119,9 +112,7 @@ class FeedList:
             for key, expected_type in self.required_feed_attributes.items():
                 # check if all attributes are present
                 if key not in feed_setting:
-                    raise KeyError(
-                        f"Missing required key: '{key}' in feed_settings."
-                    )
+                    raise KeyError(f"Missing required key: '{key}' in feed_settings.")
 
                 # check if all elements in the attributes list are of the expected type
                 if not isinstance(feed_setting[key], expected_type):
@@ -178,9 +169,7 @@ class FeedList:
 
     def _complete_paper_data(self) -> None:
         """Get the HTML contents of all papers from all feeds that are in the feed list. The content completor optimizes that data retrieval to minimize the requests. Finally assign the contents to the feeds and their respective papers."""
-        incomplete_paper_list = [
-            feed.incomplete_feed_papers for feed in self.feeds
-        ]
+        incomplete_paper_list = [feed.incomplete_feed_papers for feed in self.feeds]
         content_retriever = ContentCompletor(
             incomplete_paper_list, force_content=self.force_content
         )

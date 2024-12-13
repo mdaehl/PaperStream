@@ -20,6 +20,4 @@ credentials_file = "misc/credentials.yaml"
 
 feed_config_file = "misc/feed_config.yaml"
 
-output_file_dir = (
-    "output_files"  # used a default folder for parsed proceedings
-)
+output_file_dir = "output_files"  # used a default folder for parsed proceedings

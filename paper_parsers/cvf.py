@@ -25,9 +25,7 @@ class CVFParser(WebProceedingParser, ABC):
         """Check default year conditions from super and that it is after 2013."""
         super()._validate_year()
         if self.year < 2013:
-            raise ValueError(
-                "The CVF conferences are only available from 2013."
-            )
+            raise ValueError("The CVF conferences are only available from 2013.")
 
     def _get_url_containers(self) -> list[bs4.element.Tag]:
         """Get containers from the conference url. Try to use all day page and individual days as backup.
@@ -43,9 +41,7 @@ class CVFParser(WebProceedingParser, ABC):
         # use individual dates alternatively
         if len(url_containers) == 0:
             main_page_soup = utils.get_soup(self.conference_url)
-            conference_days = [
-                item["href"] for item in main_page_soup.select("dd >a")
-            ]
+            conference_days = [item["href"] for item in main_page_soup.select("dd >a")]
             container_urls = [
                 f"{self.base_url}/{conference_day}"
                 for conference_day in conference_days
@@ -56,9 +52,7 @@ class CVFParser(WebProceedingParser, ABC):
             ]
 
             # combine all days
-            url_containers = list(
-                chain.from_iterable(paper_title_urls_per_day)
-            )
+            url_containers = list(chain.from_iterable(paper_title_urls_per_day))
 
         return url_containers
 
@@ -83,16 +77,12 @@ class CVFParser(WebProceedingParser, ABC):
             authors = soup.select("#authors >b >i")[0].get_text().split(",")
             authors = [author.strip() for author in authors]
             abstract = soup.select("#abstract")[0].get_text(strip=True)
-            url = soup.find("meta", attrs={"name": "citation_pdf_url"})[
-                "content"
-            ]
+            url = soup.find("meta", attrs={"name": "citation_pdf_url"})["content"]
 
             return Paper(title, authors, abstract, url)
 
         except IndexError:
-            warnings.warn(
-                f"The paper with the link {paper_url} could not be found."
-            )
+            warnings.warn(f"The paper with the link {paper_url} could not be found.")
             return
 
     def _get_paper_urls(self) -> list[str]:
@@ -104,9 +94,7 @@ class CVFParser(WebProceedingParser, ABC):
         """
         paper_urls = super()._get_paper_urls()
         # add base url to all links
-        paper_urls = [
-            f"{self.base_url}/{paper_urls}" for paper_urls in paper_urls
-        ]
+        paper_urls = [f"{self.base_url}/{paper_urls}" for paper_urls in paper_urls]
         return paper_urls
 
 

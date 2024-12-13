@@ -21,9 +21,7 @@ from .content_handler import (
 class ContentCompletor:
     """Content completor to get missing data of incomplete papers from Google Scholar notifications."""
 
-    def __init__(
-        self, paper_lists: List[List[Paper]], force_content: bool = False
-    ):
+    def __init__(self, paper_lists: List[List[Paper]], force_content: bool = False):
         """Initialize a ContentCompletor object.
 
         Args:
@@ -35,9 +33,7 @@ class ContentCompletor:
         self.content_handlers = {
             "arxiv.org": ArxivContentHandler(),
             "ieee.org": IEEEContentHandler(force_content=force_content),
-            "sciencedirect.com": ElsevierContentHandler(
-                force_content=force_content
-            ),
+            "sciencedirect.com": ElsevierContentHandler(force_content=force_content),
             "springer.com": SpringerContentHandler(),
             "nature.com": NatureContentHandler(),
         }
@@ -68,12 +64,8 @@ class ContentCompletor:
         flattened_idx = 0
         for idx_feed, paper_list in enumerate(self.paper_lists):
             for idx_paper, paper in enumerate(paper_list):
-                self.papers_grouped_by_source[paper.source_domain].append(
-                    paper
-                )
-                self.input_order_indices[paper.source_domain].append(
-                    flattened_idx
-                )
+                self.papers_grouped_by_source[paper.source_domain].append(paper)
+                self.input_order_indices[paper.source_domain].append(flattened_idx)
                 self.mapping_flattened_list_to_two_d[flattened_idx] = (
                     idx_feed,
                     idx_paper,
@@ -104,9 +96,7 @@ class ContentCompletor:
         )
         request_headers = list(
             itertools.chain.from_iterable(
-                map(
-                    lambda x: x["request_headers"], self.request_infos.values()
-                )
+                map(lambda x: x["request_headers"], self.request_infos.values())
             )
         )
 
@@ -163,13 +153,10 @@ class ContentCompletor:
             # update the paper list
             flattened_indices = self.input_order_indices[domain]
             list_two_d_indices = [
-                self.mapping_flattened_list_to_two_d[idx]
-                for idx in flattened_indices
+                self.mapping_flattened_list_to_two_d[idx] for idx in flattened_indices
             ]
 
-            for paper_data, two_d_idx in zip(
-                paper_data_list, list_two_d_indices
-            ):
+            for paper_data, two_d_idx in zip(paper_data_list, list_two_d_indices):
                 # skip paper data which could be not retrieved correctly
                 if paper_data["title"] is None:
                     continue
@@ -193,12 +180,8 @@ class ContentCompletor:
         """
         unprocessed_title = selected_paper.title
         processed_title = paper_data["title"]
-        new_title = deepcopy(
-            processed_title
-        )  # avoid altering the original data
-        old_title = deepcopy(
-            unprocessed_title
-        )  # avoid altering the original data
+        new_title = deepcopy(processed_title)  # avoid altering the original data
+        old_title = deepcopy(unprocessed_title)  # avoid altering the original data
 
         # compare bare strings (without spacing, case-sensitivity or special characters)
         new_title = re.sub(r"[^a-zA-Z0-9]", "", new_title).lower()

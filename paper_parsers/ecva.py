@@ -44,9 +44,7 @@ class ECCVParser(WebProceedingParser):
         """
         paper_urls = super()._get_paper_urls()
         # add base url to all links
-        paper_urls = [
-            f"{self.base_url}/{paper_url}" for paper_url in paper_urls
-        ]
+        paper_urls = [f"{self.base_url}/{paper_url}" for paper_url in paper_urls]
         paper_urls = self.filter_urls(paper_urls)
         return paper_urls
 
@@ -92,7 +90,5 @@ class ECCVParser(WebProceedingParser):
             return Paper(title, authors, abstract, url)
 
         except IndexError:
-            warnings.warn(
-                f"The paper with the link {paper_url} could not be found."
-            )
+            warnings.warn(f"The paper with the link {paper_url} could not be found.")
             return

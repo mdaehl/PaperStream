@@ -72,9 +72,7 @@ class IEEEContentHandler(KeyedContentHandler):
         else:
             return self._get_webscrape_request_urls(paper_list)
 
-    def _get_request_identifiers(
-        self, paper_list: list[Paper]
-    ) -> list[list[str]]:
+    def _get_request_identifiers(self, paper_list: list[Paper]) -> list[list[str]]:
         """Build request identifiers to be able to subsequently assign the individual papers of combined requests.
         If the API is used, article numbers are used to select the relevant papers. Otherwise, the super method is used, returning just Nones.
 
@@ -90,9 +88,7 @@ class IEEEContentHandler(KeyedContentHandler):
         else:
             return super()._get_request_identifiers(paper_list)
 
-    def _get_article_numbers_list(
-        self, paper_list: list[Paper]
-    ) -> list[list[str]]:
+    def _get_article_numbers_list(self, paper_list: list[Paper]) -> list[list[str]]:
         """Retrieve article numbers from papers and group them w.r.t. the maximal request size.
 
         Args:
@@ -103,8 +99,7 @@ class IEEEContentHandler(KeyedContentHandler):
 
         """
         article_numbers = [
-            self._get_article_number_from_url(paper.url)
-            for paper in paper_list
+            self._get_article_number_from_url(paper.url) for paper in paper_list
         ]
         return list(
             map(
@@ -155,9 +150,7 @@ class IEEEContentHandler(KeyedContentHandler):
         ]
         return request_urls
 
-    def _get_webscrape_request_urls(
-        self, paper_list: list[Paper]
-    ) -> list[str]:
+    def _get_webscrape_request_urls(self, paper_list: list[Paper]) -> list[str]:
         """Build request urls for webscraping. Each url requests solely a single paper.
 
         Args:
@@ -216,9 +209,7 @@ class IEEEContentHandler(KeyedContentHandler):
             ]
         else:
             content = bs4.BeautifulSoup(content, features="lxml")
-            paper_data_list = [
-                self._get_paper_data_from_web_content_item(content)
-            ]
+            paper_data_list = [self._get_paper_data_from_web_content_item(content)]
 
         return paper_data_list
 
@@ -270,11 +261,7 @@ class IEEEContentHandler(KeyedContentHandler):
         # remove any styling (<xxx>, <\xxx>) from title
         title = re.sub(r"<[^>]+>", "", title)
 
-        abstract = content_item.find("meta", property="og:description")[
-            "content"
-        ]
-        authors = content_item.find("meta", attrs={"name": "parsely-author"})[
-            "content"
-        ]
+        abstract = content_item.find("meta", property="og:description")["content"]
+        authors = content_item.find("meta", attrs={"name": "parsely-author"})["content"]
         authors = authors.split(";")
         return {"title": title, "abstract": abstract, "authors": authors}

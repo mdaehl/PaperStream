@@ -58,9 +58,7 @@ def parse_proceeding(
         try:
             paper_parser = name_to_parser[conference](year=year, issue=issue)
         except KeyError:
-            raise KeyError(
-                "An issue can solely be passed to journals not conferences."
-            )
+            raise KeyError("An issue can solely be passed to journals not conferences.")
 
     paper_parser.retrieve_papers()
     paper_parser.export_papers(output_file=output_file, file_type=file_type)

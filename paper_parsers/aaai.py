@@ -47,8 +47,7 @@ class AAAIParser(WebProceedingParser):
         start_idx = self.year_mapping[self.year]["start"]
         end_idx = self.year_mapping[self.year]["end"]
         conference_pages = [
-            f"{self.base_url}/issue/view/{i}"
-            for i in range(start_idx, end_idx)
+            f"{self.base_url}/issue/view/{i}" for i in range(start_idx, end_idx)
         ]
 
         # get all page contents via asyncio
@@ -58,9 +57,7 @@ class AAAIParser(WebProceedingParser):
             utils.get_urls_content(conference_pages, headers_list=headers_list)
         )
         # process each page content
-        soup_contents = map(
-            lambda x: bs4.BeautifulSoup(x, "lxml"), page_contents
-        )
+        soup_contents = map(lambda x: bs4.BeautifulSoup(x, "lxml"), page_contents)
         url_containers = map(
             lambda x: x.find_all("div", class_="obj_article_summary"),
             soup_contents,
@@ -70,9 +67,7 @@ class AAAIParser(WebProceedingParser):
 
         return url_containers
 
-    def _parse_paper_content(
-        self, paper_content: str, paper_url: str = None
-    ) -> Paper:
+    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:

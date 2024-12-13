@@ -47,9 +47,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Use mapping of feeds from config file.",
     )
-    arg_parser.add_argument(
-        "--source", "-s", help="Path to xml feeds file.", type=str
-    )
+    arg_parser.add_argument("--source", "-s", help="Path to xml feeds file.", type=str)
     arg_parser.add_argument(
         "--target",
         "-t",

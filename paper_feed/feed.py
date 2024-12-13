@@ -30,9 +30,7 @@ class Feed:
         self.online = online
         self.appending = appending
 
-        self.feed_content = (
-            self._load_feed_content()
-        )  # content as BeautifulSoup
+        self.feed_content = self._load_feed_content()  # content as BeautifulSoup
 
         if self.appending:
             self.existing_papers = self._get_existing_papers()
@@ -111,9 +109,7 @@ class Feed:
                     file_soup_content.select("entry >summary"),
                 )
             )
-            links = list(
-                map(lambda x: x.text, file_soup_content.select("entry >id"))
-            )
+            links = list(map(lambda x: x.text, file_soup_content.select("entry >id")))
 
             for title, authors, abstract, url in zip(
                 titles, all_authors, abstracts, links

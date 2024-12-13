@@ -46,9 +46,7 @@ class BMVCParser(WebProceedingParser):
         url_containers = list(main_soup.find_all("tr", id="paper"))
         return url_containers
 
-    def _parse_paper_content(
-        self, paper_content: str, paper_url: str = None
-    ) -> Paper:
+    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:

@@ -122,9 +122,7 @@ class CSVFileExporter(FileExporter):
         # get rid of optional file extension
         self.output_file = re.sub(".csv", "", self.output_file)
 
-        with open(
-            f"{self.output_file}.csv", "w", newline="", encoding="utf-8"
-        ) as f:
+        with open(f"{self.output_file}.csv", "w", newline="", encoding="utf-8") as f:
             data = [
                 {k: v for k, v in vars(paper).items() if k in exported_fields}
                 for paper in paper_list

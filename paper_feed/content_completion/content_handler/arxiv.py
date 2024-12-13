@@ -53,8 +53,7 @@ class ArxivContentHandler(ContentHandler):
 
         """
         return [
-            [None]
-            for _ in range(math.ceil(len(paper_list) / self.max_request_size))
+            [None] for _ in range(math.ceil(len(paper_list) / self.max_request_size))
         ]
 
     def _get_request_headers(self, paper_list: list[Paper]) -> list[None]:

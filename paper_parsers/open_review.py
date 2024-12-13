@@ -113,8 +113,7 @@ class ICLRParser(OpenReviewParser):
 
         """
         proceeding_submissions_replies = [
-            submission.details["directReplies"]
-            for submission in request_contents
+            submission.details["directReplies"] for submission in request_contents
         ]
 
         filtered_submissions = []
@@ -147,8 +146,7 @@ class ICLRParser(OpenReviewParser):
 
         """
         proceeding_submissions_replies = [
-            submission.details["directReplies"]
-            for submission in request_contents
+            submission.details["directReplies"] for submission in request_contents
         ]
 
         filtered_submissions = []

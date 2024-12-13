@@ -48,9 +48,7 @@ class PLMRParser(WebProceedingParser):
         url_containers = list(main_soup.select("p.links"))
         return url_containers
 
-    def _parse_paper_content(
-        self, paper_content: str, paper_url: str = None
-    ) -> Paper:
+    def _parse_paper_content(self, paper_content: str, paper_url: str = None) -> Paper:
         """Parse paper content via bs4 into a paper object.
 
         Args:

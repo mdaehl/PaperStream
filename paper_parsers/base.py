@@ -193,8 +193,7 @@ class APIProceedingParser(ProceedingParser):
         contents = self._filter_contents(contents)
         print("Parsing paper contents.")
         self.papers = [
-            self._parse_paper_content(paper_content)
-            for paper_content in contents
+            self._parse_paper_content(paper_content) for paper_content in contents
         ]
 
 

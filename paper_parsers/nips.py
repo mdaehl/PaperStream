@@ -28,9 +28,7 @@ class NIPSParser(WebProceedingParser):
         """
         super()._validate_year()
         if self.year < 1987:
-            raise ValueError(
-                "The conferences NIPS is only available until 1987."
-            )
+            raise ValueError("The conferences NIPS is only available until 1987.")
 
     def _get_url_containers(self) -> list[bs4.element.Tag]:
         """Get containers (Tags) from the conference url which contain the paper urls.
@@ -66,14 +64,9 @@ class NIPSParser(WebProceedingParser):
         authors = soup.select("p >i")[0].text.split(",")
         authors = [author.strip() for author in authors]
         abstract = (
-            soup.find("h4", text="Abstract")
-            .find_next("p")
-            .find_next("p")
-            .getText()
+            soup.find("h4", text="Abstract").find_next("p").find_next("p").getText()
         )
-        abstract = abstract.replace(
-            "  ", " "
-        )  # sometimes there are double spaces
+        abstract = abstract.replace("  ", " ")  # sometimes there are double spaces
         url = soup.find("meta", attrs={"name": "citation_pdf_url"})["content"]
 
         return Paper(title, authors, abstract, url)
