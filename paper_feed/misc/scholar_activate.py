@@ -3,6 +3,7 @@ import re
 
 import requests
 from tqdm import tqdm
+import bs4
 
 from misc import settings
 
@@ -39,13 +40,12 @@ def get_activation_link(
         Confirmation url required to activate the feed.
 
     """
-    match = re.search(
-        r"(?P<url>http://scholar.google.com/scholar_alerts\?update_op=confirm_alert.*?alert_id.*?)&#x22;",
-        content,
-    )
-    link = match.group("url")
-    link = link.replace("amp;", "&").replace(";", "").replace("#", "")
-    return link
+    soup = bs4.BeautifulSoup(content, "xml")
+    content_html = soup.find("content").text
+    content_soup = bs4.BeautifulSoup(content_html, "html.parser")
+    confirmation_url = content_soup.find("a", string="Confirm")
+    confirmation_url = confirmation_url["href"]
+    return confirmation_url
 
 
 def activate_feed(
